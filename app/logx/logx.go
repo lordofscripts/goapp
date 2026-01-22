@@ -21,7 +21,8 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"syscall"
+
+	"github.com/lordofscripts/goapp/app"
 )
 
 /* ----------------------------------------------------------------
@@ -202,8 +203,13 @@ func (l *LogGate) EnableLoggingToDir(dirname string) error {
 func (l *LogGate) EnableLoggingToFile(filename string) error {
 	var err error
 	if l.fd, err = os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644); err == nil {
-		syscall.Dup2(int(l.fd.Fd()), 1) // stdout
-		syscall.Dup2(int(l.fd.Fd()), 2) // stderr
+		if runtime.GOOS != "windows" {
+			app.Dup2(int(l.fd.Fd()), 1) // stdout
+			app.Dup2(int(l.fd.Fd()), 2) // stderr
+		} else {
+			app.Dup2(l.fd.Fd(), 1) // stdout
+			app.Dup2(l.fd.Fd(), 2) // stderr
+		}
 	}
 
 	return err

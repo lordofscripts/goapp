@@ -9,10 +9,20 @@
  *-----------------------------------------------------------------*/
 package app
 
+import "syscall"
+
 /* ----------------------------------------------------------------
  *					F u n c t i o n s
  *-----------------------------------------------------------------*/
 
 func GetUserTempDir() string {
 	return "/tmp"
+}
+
+// @todo Use golang.org/x/sys package for better portability?
+func Dup2(oldfd, newfd any) error {
+	var oldFD, newFD int
+	oldFD, _ = oldfd.(int)
+	newFD, _ = newfd.(int)
+	return syscall.Dup2(oldFD, newFD)
 }
