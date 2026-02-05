@@ -49,6 +49,8 @@ from some of my applications into this Go module.*
 * Check whether your input is from a pipe: `IsPipeInput()`
 * Obtain a platform-agnostic configuration directory: `GetConfigDir()`
   and ensure it is present or created for your application: `EnsureConfigDir()`
+* custom flags for the `flag` standard package: `flagx.RuneFlag`, 
+  `flagx.ByteFlag` and `flagx.DateFlag`  
 
 ### Logging
 
