@@ -57,7 +57,7 @@ Requirements:
 * Obtain a platform-agnostic configuration directory: `GetConfigDir()`
   and ensure it is present or created for your application: `EnsureConfigDir()`
 * custom flags for the `flag` standard package: `flagx.RuneFlag`, 
-  `flagx.ByteFlag` and `flagx.DateFlag`  
+  `flagx.ByteFlag`, `flagx.StringsFlag` and `flagx.DateFlag`  
 * A convenience function to detect **piped** input for Linux/Unix apps.
   If you are debugging piped tests in VSCode, set the environment
   variable `DD_PIPED_INPUT=1`.
@@ -108,6 +108,18 @@ Outputing your [Buy Me a Coffee](https://buymeacoffee.com/lostinwriting)
 profile URL:
 
 > app.BuyMeCoffee("lordofscripts")
+
+Then, should your application need to rest in peace:
+
+```go
+  const EXIT_CODE int = 5
+  app.Die("bad thing happened", EXIT_CODE)
+  app.DieWith(EXIT_CODE, "%d bad things happened", 3)
+  app.DieWithError(err, EXIT_CODE)
+```  
+
+And there are a few more utility functions. Please check the package
+documentation.
 
 ### Application Configuration
 
