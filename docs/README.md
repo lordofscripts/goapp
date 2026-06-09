@@ -37,6 +37,10 @@ from some of my applications into this Go module.*
 
 > go get github.com/lordofscripts/goapp@latest
 
+Requirements:
+
+* GO `v1.21`
+
 ## Features
 
 * There are several constructors in the `app` package to declare your
