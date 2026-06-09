@@ -176,10 +176,10 @@ func Today() time.Time {
  *-----------------------------------------------------------------*/
 /*
 func DemoDateFlag() {
-	var myDate1 DateFlag = NewDateFlag("2025-Jan-01")
+	var myDate1 DateFlag = NewDateVar("2006-Jan-02")
 	flag.Var(&myDate, "date", "custom Date value")
 	flag.Parse()
 
-	fmt.Printf("Date value: %c\n", myDate.Value)
+	fmt.Printf("Date value: %s\n", myDate.Value)
 }
 */
