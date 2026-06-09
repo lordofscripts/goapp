@@ -32,20 +32,25 @@ const (
 // Death of an application by outputting a good-bye and setting
 // the OS exit code. It is logged as fatal.
 func Die(message string, exitCode int) {
-	fmt.Println("\n", "\t💀 x 💀 x 💀\n\t", message, "\n\tExit code: ", exitCode)
+	fmt.Fprintln(os.Stderr, "\n", "\t💀 x 💀 x 💀\n\t", message, "\n\tExit code: ", exitCode)
 	mlog.FatalT(exitCode, message, mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+}
+
+func DieWith(exitCode int, format string, args ...any) {
+	err := fmt.Errorf(format, args...)
+	DieWithError(err, exitCode)
 }
 
 // display the error and die with an exit code, logging it as Fatal.
 func DieWithError(err error, exitCode int) {
-	fmt.Println("\n", "\t💀 x 💀 x 💀\n\t", err.Error(), "\n\tExit code: ", exitCode)
+	fmt.Fprintln(os.Stderr, "\n", "\t💀 x 💀 x 💀\n\t", err.Error(), "\n\tExit code: ", exitCode)
 	mlog.FatalT(exitCode, err.Error(), mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
 }
 
 // When the condition is met the warning message is printed
 func Assert(condition bool, warnMessage string) {
 	if condition {
-		fmt.Printf("\n\t%c Assertion Failed:\n\t%s\n", UC_RED_EXCLAMATION, warnMessage)
+		fmt.Fprintf(os.Stderr, "\n\t%c Assertion Failed:\n\t%s\n", UC_RED_EXCLAMATION, warnMessage)
 	}
 }
 
@@ -53,19 +58,19 @@ func Assert(condition bool, warnMessage string) {
 // application terminates with the exit code.
 func AssertOrDie(condition bool, deathMessage string, exitCode int) {
 	if condition {
-		fmt.Printf("\n\t%c Assertion Failed:", UC_RED_EXCLAMATION)
+		fmt.Fprintf(os.Stderr, "\n\t%c Assertion Failed:", UC_RED_EXCLAMATION)
 		Die(deathMessage, exitCode)
 	}
 }
 
 // prints the error message with the exit code but does NOT exit.
 func AnnounceErrorMessage(message string, exitCode int) {
-	fmt.Println("\n", "\t💀 x 💀 x 💀\n\t", message, "\n\tExit code: ", exitCode)
+	fmt.Fprintln(os.Stderr, "\n", "\t💀 x 💀 x 💀\n\t", message, "\n\tExit code: ", exitCode)
 }
 
 // prints the error and exit code but does NOT exit the application.
 func AnnounceError(err error, exitCode int) {
-	fmt.Println("\n", "\t💀 x 💀 x 💀\n\t", err.Error(), "\n\tExit code: ", exitCode)
+	fmt.Fprintln(os.Stderr, "\n", "\t💀 x 💀 x 💀\n\t", err.Error(), "\n\tExit code: ", exitCode)
 }
 
 // Returns true if the application input is not from a character device (tty)
@@ -84,8 +89,8 @@ func IsPipedInput() bool {
 }
 
 // platform-agnostic function to obtain the user's configuration directory.
-// In Linux "~/.config/appName", Windows "APPDATA/appName" and
-// MacOS "~/Library/Application Support/appName"
+// In Linux "~/.config/orgName, appName", Windows "APPDATA\orgName\appName" and
+// MacOS "~/Library/Application Support/orgName/appName"
 func GetConfigDir(orgName, appName string) (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -117,7 +122,8 @@ func EnsureConfigDir(path string) error {
 // for orgName and appName. The application configuration file has
 // the same name as the application (appName) plus the extension.
 // If fileExtension is missing the leading period, it is automatically
-// added. Upon success it returns the fully-qualified configuration filename.
+// added. It returns the fully-qualified configuration filename and
+// whether an error occurred or not.
 func EnsureConfig(orgName, appName, fileExtension string) (string, error) {
 	var err error = nil
 	var cfgPath string
@@ -137,7 +143,7 @@ func EnsureConfig(orgName, appName, fileExtension string) (string, error) {
 		}
 	}
 
-	return "", err
+	return cfgPath, err
 }
 
 // Checks whether the file exists and is readable.

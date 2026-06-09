@@ -120,3 +120,12 @@ in one is:
  const CONFIG_FILE_EXT string = ".json" // or .yaml or .ini
  configFile, err := app.EnsureConfig(ORG_NAME, APP_NAME, CONFIG_FILE_EXT)
 ```
+
+Even when an error happens, the `configFile` return value will always
+have the expected fully-qualified name of the configuration file.
+
+The configuration *directory* varies per OS:
+
+* **Linux & Unix**: `~/.config/ORG_NAME/APP_NAME`
+* **MacOS**: `~/Library/Application Support/ORG_NAME/APP_NAME`
+* **Microsoft Windows**: `C:\\Users\USERNAME\APPDATA\ORG_NAME\APP_NAME`
