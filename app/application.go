@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------
  *					L o r d  O f   S c r i p t s (tm)
- *				  Copyright (C)2025 Dídimo Grimaldo T.
+ *				  Copyright (C)2025-2026 Dídimo Grimaldo T.
  *							   go-app
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Application-related functions.
@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/lordofscripts/goapp/app/mlog"
 )
@@ -73,25 +74,31 @@ func AnnounceError(err error, exitCode int) {
 // process them accordingly.
 func IsPipedInput() bool {
 	fi, _ := os.Stdin.Stat()
+	// This is a workaround for VSCode debug sessions which would otherwise
+	// make this function return true. For VSCode debugger set the env
+	// in launch.json to DD_NOT_PIPED=1
+	if os.Getenv("DD_NOT_PIPED") == "1" {
+		return false
+	}
 	return (fi.Mode() & os.ModeCharDevice) == 0
 }
 
 // platform-agnostic function to obtain the user's configuration directory.
 // In Linux "~/.config/appName", Windows "APPDATA/appName" and
 // MacOS "~/Library/Application Support/appName"
-func GetConfigDir(orgName, appName string) string {
+func GetConfigDir(orgName, appName string) (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	switch runtime.GOOS {
 	case "windows":
-		return filepath.Join(os.Getenv("APPDATA"), orgName, appName)
+		return filepath.Join(os.Getenv("APPDATA"), orgName, appName), nil
 	case "darwin": // macOS
-		return filepath.Join(homeDir, "Library", "Application Support", orgName, appName)
+		return filepath.Join(homeDir, "Library", "Application Support", orgName, appName), nil
 	default: // Other platforms (Linux, etc.)
-		return filepath.Join(homeDir, ".config", orgName, appName)
+		return filepath.Join(homeDir, ".config", orgName, appName), nil
 	}
 }
 
@@ -104,6 +111,33 @@ func EnsureConfigDir(path string) error {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 	return nil
+}
+
+// Ensures the platform-aware configuration file and directory exist
+// for orgName and appName. The application configuration file has
+// the same name as the application (appName) plus the extension.
+// If fileExtension is missing the leading period, it is automatically
+// added. Upon success it returns the fully-qualified configuration filename.
+func EnsureConfig(orgName, appName, fileExtension string) (string, error) {
+	var err error = nil
+	var cfgPath string
+	// build name of platform-aware configuration directory
+	if cfgPath, err = GetConfigDir(orgName, appName); err == nil {
+		if err = EnsureConfigDir(cfgPath); err == nil {
+			// ensure correct file extension with leadig period
+			fileExtension = strings.Trim(fileExtension, " \t")
+			if !strings.HasPrefix(fileExtension, ".") {
+				fileExtension = "." + fileExtension
+			}
+			// the config file has the name of the app plus extension
+			filePath := filepath.Join(cfgPath, appName+fileExtension)
+			if err = CheckFileExistsAndReadable(filePath); err == nil {
+				return filePath, nil
+			}
+		}
+	}
+
+	return "", err
 }
 
 // Checks whether the file exists and is readable.
