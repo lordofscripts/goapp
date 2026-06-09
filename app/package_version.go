@@ -61,6 +61,46 @@ func NewPackageVersion(name, description string, verStr string, status DevStatus
 	}
 }
 
+// ctor for Release versions of a package
+func NewReleaseVersion(name, description string, verStr string) PackageVersion {
+	return PackageVersion{
+		n:  name,
+		v:  verStr,
+		s:  DevStatusReleased,
+		sv: 1,
+	}
+}
+
+// ctor for Alpha versions of a package
+func NewAlphaVersion(name, description string, verStr string, alphaNum int) PackageVersion {
+	return PackageVersion{
+		n:  name,
+		v:  verStr,
+		s:  DevStatusAlpha,
+		sv: alphaNum,
+	}
+}
+
+// ctor for Beta versions of a package
+func NewBetaVersion(name, description string, verStr string, betaNum int) PackageVersion {
+	return PackageVersion{
+		n:  name,
+		v:  verStr,
+		s:  DevStatusBeta,
+		sv: betaNum,
+	}
+}
+
+// ctor for Release Candidate versions of a package, i.e. 1.0.0-RC.1
+func NewReleaseCandidateVersion(name, description string, verStr string, rcNum int) PackageVersion {
+	return PackageVersion{
+		n:  name,
+		v:  verStr,
+		s:  DevStatusRC,
+		sv: rcNum,
+	}
+}
+
 /* ----------------------------------------------------------------
  *                        M E T H O D S
  *-----------------------------------------------------------------*/
@@ -71,9 +111,9 @@ func NewPackageVersion(name, description string, verStr string, status DevStatus
 
 // Specify a revision number in case of DevStatusRC, DevStatusAlpha
 // or DevStatusBeta. Ignored in the output for DevStatusRelease.
-func (pv PackageVersion) WithRevision(rev int) PackageVersion {
+func (pv *PackageVersion) WithRevision(rev int) PackageVersion {
 	pv.sv = rev
-	return pv
+	return *pv
 }
 
 // Like String() but without the name, just the version number
@@ -87,7 +127,7 @@ func (pv PackageVersion) Short() string {
 	case DevStatusBeta:
 		fallthrough
 	case DevStatusRC:
-		ver = fmt.Sprintf("v%s-%s-%d", pv.v, pv.s, pv.sv)
+		ver = fmt.Sprintf("v%s-%s.%d", pv.v, pv.s, pv.sv)
 	default:
 		ver = fmt.Sprintf("v%s", pv.v)
 	}
