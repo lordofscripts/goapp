@@ -1,4 +1,4 @@
-# Go App - Spice up your GO applications
+# Go App v1.3 - Spice up your GO applications
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/lordofscripts/goapp)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lordofscripts/goapp?style=flat-square)](https://goreportcard.com/report/github.com/lordofscripts/goapp)
@@ -39,6 +39,9 @@ from some of my applications into this Go module.*
 
 ## Features
 
+* There are several constructors in the `app` package to declare your
+  software version. It follows *Semantic Versioning* allowing for
+  Alpha, Beta, RC and (final) releases.
 * Your choice of enhanced, non-structured logging packages: `app/logx`
   or `app/mlog`. These are enhanced versions of the standard `log`
   and `log/slog` packages. Or also level-agnostic colored logging.
@@ -51,6 +54,9 @@ from some of my applications into this Go module.*
   and ensure it is present or created for your application: `EnsureConfigDir()`
 * custom flags for the `flag` standard package: `flagx.RuneFlag`, 
   `flagx.ByteFlag` and `flagx.DateFlag`  
+* A convenience function to detect **piped** input for Linux/Unix apps.
+  If you are debugging piped tests in VSCode, set the environment
+  variable `DD_PIPED_INPUT=1`.
 
 ### Logging
 
@@ -63,3 +69,49 @@ You have two choices of enhanced logging ready to use:
   them but the output happens *regardless* of the actual log level.
 * [Logx](LOGX.md) preformatted logging with call-tree support, it was
   instrumental to get one of my Fyne GUI applications to work.
+
+### Command-line applications
+
+For declaring your application/package versions:
+
+> const BASE_VERSION string = "1.3.2"
+> const REVISION int = 8
+> For Alpha version v1.3.2-Alpha.8
+> pver := app.NewAlphaVersion(NAME, DESC, BASE_VERSION, REVISION)
+> For Beta version v1.3.2-Beta.8
+> pver := app.NewBetaVersion(NAME, DESC, BASE_VERSION, REVISION)
+> For Release Candidate version v1.3.2-RC.8
+> pver := app.NewReleaseCandidateVersion(NAME, DESC, BASE_VERSION, REVISION)
+> For final release version v1.3.2
+> pver := app.NewReleaseVersion(NAME, DESC, BASE_VERSION)
+
+Getting the version number as displayed above:
+
+> pver.Short()
+
+The app name plus its version number:
+
+> fmt.Println(pver.String())
+
+Outputting your application copyright on the CLI:
+
+> app.Copyright("Jan Knowsalot", '\u2615')
+
+Outputing your [Buy Me a Coffee](https://buymeacoffee.com/lostinwriting)
+profile URL:
+
+> app.BuyMeCoffee("lordofscripts")
+
+### Application Configuration
+
+The package has built-in utility functions to let your application
+use an application configuration file in a platform-aware fashion.
+Thus, it works on MacOS, Windows and Linux but the directory where
+it resides varies depending on the OS. There are several functions
+but the one that makes use of all of them to accomplish all tasks
+in one is:
+
+> const ORG_NAME string = "acme"
+> const APP_NAME string = "coyote"
+> const CONFIG_FILE_EXT string = ".json" // or .yaml or .ini
+> configFile, err := app.EnsureConfig(ORG_NAME, APP_NAME, CONFIG_FILE_EXT)
