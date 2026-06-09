@@ -74,14 +74,17 @@ You have two choices of enhanced logging ready to use:
 
 For declaring your application/package versions:
 
-> const BASE_VERSION string = "1.3.2"
-> const REVISION int = 8
-> For Alpha version v1.3.2-Alpha.8
-> pver := app.NewAlphaVersion(NAME, DESC, BASE_VERSION, REVISION)
-> For Beta version v1.3.2-Beta.8
-> pver := app.NewBetaVersion(NAME, DESC, BASE_VERSION, REVISION)
-> For Release Candidate version v1.3.2-RC.8
-> pver := app.NewReleaseCandidateVersion(NAME, DESC, BASE_VERSION, REVISION)
+```go
+ const BASE_VERSION string = "1.3.2"
+ const REVISION int = 8
+ For Alpha version v1.3.2-Alpha.8
+ pver := app.NewAlphaVersion(NAME, DESC, BASE_VERSION, REVISION)
+ For Beta version v1.3.2-Beta.8
+ pver := app.NewBetaVersion(NAME, DESC, BASE_VERSION, REVISION)
+ For Release Candidate version v1.3.2-RC.8
+ pver := app.NewReleaseCandidateVersion(NAME, DESC, BASE_VERSION, REVISION)
+```
+
 > For final release version v1.3.2
 > pver := app.NewReleaseVersion(NAME, DESC, BASE_VERSION)
 
@@ -111,7 +114,9 @@ it resides varies depending on the OS. There are several functions
 but the one that makes use of all of them to accomplish all tasks
 in one is:
 
-> const ORG_NAME string = "acme"
-> const APP_NAME string = "coyote"
-> const CONFIG_FILE_EXT string = ".json" // or .yaml or .ini
-> configFile, err := app.EnsureConfig(ORG_NAME, APP_NAME, CONFIG_FILE_EXT)
+```go
+ const ORG_NAME string = "acme"
+ const APP_NAME string = "coyote"
+ const CONFIG_FILE_EXT string = ".json" // or .yaml or .ini
+ configFile, err := app.EnsureConfig(ORG_NAME, APP_NAME, CONFIG_FILE_EXT)
+```
