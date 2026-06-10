@@ -91,6 +91,25 @@ func IsPipedInput() bool {
 // platform-agnostic function to obtain the user's configuration directory.
 // In Linux "~/.config/orgName, appName", Windows "APPDATA\orgName\appName" and
 // MacOS "~/Library/Application Support/orgName/appName"
+func GetOSConfigDir() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	switch runtime.GOOS {
+	case "windows":
+		return os.Getenv("APPDATA"), nil
+	case "darwin": // macOS
+		return filepath.Join(homeDir, "Library", "Application Support"), nil
+	default: // Other platforms (Linux, etc.)
+		return filepath.Join(homeDir, ".config"), nil
+	}
+}
+
+// platform-agnostic function to obtain the user's configuration directory.
+// In Linux "~/.config/orgName, appName", Windows "APPDATA\orgName\appName" and
+// MacOS "~/Library/Application Support/orgName/appName"
 func GetConfigDir(orgName, appName string) (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -137,6 +156,34 @@ func EnsureConfig(orgName, appName, fileExtension string) (string, error) {
 			}
 			// the config file has the name of the app plus extension
 			filePath := filepath.Join(cfgPath, appName+fileExtension)
+			if err = CheckFileExistsAndReadable(filePath); err == nil {
+				return filePath, nil
+			} else {
+				// at least returned the expected filename
+				return filePath, err
+			}
+		}
+	}
+
+	return cfgPath, err // no home directory
+}
+
+// Same as EnsureConfig except it adds the suffix to the basename. Thus,
+// with orgName "ACME", appName "goapp" and nameSuffix "_template" and fileExtension "json",
+// the resulting name would be ~/PathToConfig/ACME/goapp_template.json
+func EnsureConfigWithSuffix(orgName, appName, nameSuffix, fileExtension string) (string, error) {
+	var err error = nil
+	var cfgPath string
+	// build name of platform-aware configuration directory
+	if cfgPath, err = GetConfigDir(orgName, appName); err == nil {
+		if err = EnsureConfigDir(cfgPath); err == nil {
+			// ensure correct file extension with leadig period
+			fileExtension = strings.Trim(fileExtension, " \t")
+			if !strings.HasPrefix(fileExtension, ".") {
+				fileExtension = "." + fileExtension
+			}
+			// the config file has the name of the app plus extension
+			filePath := filepath.Join(cfgPath, appName+nameSuffix+fileExtension)
 			if err = CheckFileExistsAndReadable(filePath); err == nil {
 				return filePath, nil
 			} else {
