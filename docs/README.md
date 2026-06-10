@@ -145,3 +145,15 @@ The configuration *directory* varies per OS:
 * **Linux & Unix**: `~/.config/ORG_NAME/APP_NAME`
 * **MacOS**: `~/Library/Application Support/ORG_NAME/APP_NAME`
 * **Microsoft Windows**: `C:\\Users\USERNAME\APPDATA\ORG_NAME\APP_NAME`
+
+That path minus the `ORG_NAME/APP_NAME` part can be obtained by
+calling `app.GetOSConfigDir()`.
+
+To obtain the main configuration file:
+
+> `cfgFilename, err := app.EnsureConfig(ORG_NAME, APP_NAME, CONFIG_FILE_EXT)`
+
+But if you have several configuration files in addition to the main,
+for example `coyote_templates.json` you could use:
+
+> `cfgFilename, err := app.EnsureConfigWithSuffix(ORG_NAME, APP_NAME, "_templates", CONFIG_FILE_EXT)`
