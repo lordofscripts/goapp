@@ -139,11 +139,14 @@ func EnsureConfig(orgName, appName, fileExtension string) (string, error) {
 			filePath := filepath.Join(cfgPath, appName+fileExtension)
 			if err = CheckFileExistsAndReadable(filePath); err == nil {
 				return filePath, nil
+			} else {
+				// at least returned the expected filename
+				return filePath, err
 			}
 		}
 	}
 
-	return cfgPath, err
+	return cfgPath, err // no home directory
 }
 
 // Checks whether the file exists and is readable.
