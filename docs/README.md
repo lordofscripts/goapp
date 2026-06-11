@@ -1,4 +1,4 @@
-# Go App v1.3 - Spice up your GO applications
+# Go App v1.4 - Spice up your GO applications
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/lordofscripts/goapp)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lordofscripts/goapp?style=flat-square)](https://goreportcard.com/report/github.com/lordofscripts/goapp)
@@ -61,6 +61,9 @@ Requirements:
 * A convenience function to detect **piped** input for Linux/Unix apps.
   If you are debugging piped tests in VSCode, set the environment
   variable `DD_PIPED_INPUT=1`.
+* Platform-agnostic `app.IsHiddenFile()`
+* A `app.Warning` object that implements `error` interface and user
+  can customize the `app.WarningCode` as an enumeration. See example.
 
 ### Logging
 
