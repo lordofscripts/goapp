@@ -19,6 +19,12 @@ const (
 	CHR_TRIDENT = rune(0x1f531) // 🔱
 )
 
+const (
+	// you can create your own WarningCode enumeration
+	WarnNotFound app.WarningCode = iota
+	WarnInvalid
+)
+
 var (
 	Version app.PackageVersion = app.NewReleaseVersion(APP_NAME, "Just a test", MANUAL_VERSION)
 )
@@ -47,6 +53,16 @@ func main() {
 	fmt.Printf("Byte value: %c\n", myByte.Value)
 	fmt.Printf("Rune value: %c\n", myRune.Value)
 	fmt.Printf("Date value: %s\n", myDate.Value)
+
+	// ########### app Warning ##############
+	warn1 := app.NewWarning(WarnNotFound, "could not find %s", os.Args[0])
+	warn2 := app.NewWarningAsErr(WarnInvalid, "something invalid %s", os.Args[0])
+	fmt.Println("Plain warning: ", warn1)
+	if warnT, isWarn := app.IsWarning(warn2); isWarn {
+		fmt.Println("Disguised warning: ", warnT)
+	} else {
+		fmt.Printf("Warning as error: %v\n", warn2)
+	}
 
 	// ########### app Package ##############
 	Version.BuyMeCoffee("lostinwriting")
