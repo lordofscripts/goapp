@@ -61,3 +61,17 @@ func Dup2(oldfd, newfd any) error {
 	}
 	return nil
 }
+
+// (Windows) whether the file is hidden, i.e. it has
+// the HIDDEN file attribute.
+func IsHiddenFile(filename string) (bool, error) {
+	pointer, err := syscall.UTF16PtrFromString(filename)
+	if err != nil {
+		return false, err
+	}
+	attributes, err := syscall.GetFileAttributes(pointer)
+	if err != nil {
+		return false, err
+	}
+	return attributes&syscall.FILE_ATTRIBUTE_HIDDEN != 0, nil
+}

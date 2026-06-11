@@ -26,3 +26,9 @@ func Dup2(oldfd, newfd any) error {
 	newFD, _ = newfd.(int)
 	return syscall.Dup2(oldFD, newFD)
 }
+
+// (Linux|Unix|Darwin) whether the file is hidden, i.e. its
+// name starts with a leading period.
+func IsHiddenFile(filename string) (bool, error) {
+	return filename[0] == '.', nil
+}
