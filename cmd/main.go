@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ORG_NAME       string      = "coralys"
+	ORG_NAME       string      = "ACME"
 	APP_NAME       string      = "goapptest"
 	META_FILE_MODE os.FileMode = 0644
 	MANUAL_VERSION             = "1.0.0"
@@ -66,4 +66,9 @@ func main() {
 
 	// ########### app Package ##############
 	Version.BuyMeCoffee("lostinwriting")
+
+	const EXIT_CODE = 1
+	dummyErr := fmt.Errorf("just kidding! demonstrating error formatting")
+	veryDummyErr := fmt.Errorf("Wrapped: %w", dummyErr)
+	app.DieWithError(veryDummyErr, EXIT_CODE)
 }
