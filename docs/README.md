@@ -64,6 +64,7 @@ Requirements:
 * Platform-agnostic `app.IsHiddenFile()`
 * A `app.Warning` object that implements `error` interface and user
   can customize the `app.WarningCode` as an enumeration. See example.
+* A helper to deal with sub-commands and FlagSets `flagx.FlagSubCommander`
 
 ### Logging
 
@@ -76,6 +77,8 @@ You have two choices of enhanced logging ready to use:
   them but the output happens *regardless* of the actual log level.
 * [Logx](LOGX.md) preformatted logging with call-tree support, it was
   instrumental to get one of my Fyne GUI applications to work.
+
+For examples see the supplied [demo application](../cmd/main.go).
 
 ### Command-line applications
 
@@ -121,6 +124,19 @@ Then, should your application need to rest in peace:
   app.DieWithError(err, EXIT_CODE)
 ```  
 
+A sample output of a wrapped *terminal* (application dies) would look like:
+
+```
+💥 ERROR (ERR-001) 💥
+🎯 From: main #73
+·  Wrapped: just kidding! demonstrating error formatting
+·  just kidding! demonstrating error formatting
+💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 
+------------------------------------------------------------
+```
+
+if it is an error without application termination, the skulls will be missing.
+
 And there are a few more utility functions. Please check the package
 documentation.
 
@@ -160,3 +176,51 @@ But if you have several configuration files in addition to the main,
 for example `coyote_templates.json` you could use:
 
 > `cfgFilename, err := app.EnsureConfigWithSuffix(ORG_NAME, APP_NAME, "_templates", CONFIG_FILE_EXT)`
+
+### Flag Sub-commands (FlagSet Helper)
+
+Sometimes command-line applications can get unwieldy with many CLI flags.
+There is a moment where the user cannot easily identify which flags can
+or should be used with a specific functionality.
+
+For that reason the standard `flag` package includes support for `FlagSet`.
+But, it is not totally intuitive how to use them properly. For that I
+included a helper that alleviates dealing with that: `flagx.FlagSubCommander`.
+
+```go
+func DemoMain() {
+	const (
+		SUBCMD_ENCODE string = "encrypt"
+		SUBCMD_DECODE string = "decrypt"
+	)
+	subCom := NewFlagSubCommander()
+
+	HelpEncrypt := func() {
+		fmt.Println("aes encrypt -text 'PLAIN'")
+	}
+	encodeCmd := subCom.Define(SUBCMD_ENCODE, flag.ExitOnError)
+	encodeCmd.Usage = HelpEncrypt
+	plainTxt := encodeCmd.String("plain", "", "Plain text")
+
+	HelpDecrypt := func() {
+		fmt.Println("aes decrypt -cipher 'SECRET'")
+	}
+	decodeCmd := subCom.Define(SUBCMD_DECODE, flag.ExitOnError)
+	decodeCmd.Usage = HelpDecrypt
+	cipherTxt := decodeCmd.String("cipher", "", "Ciphered text to decrypt")
+
+	if err := subCom.Parse(); err != nil {
+		fmt.Println(err.Error())
+	} else {
+		// do something
+		switch subCom.SubCommandName() {
+		case SUBCMD_ENCODE:
+			// do something
+			AesCipher(plainTxt)
+		case SUBCMD_DECODE:
+			// do something
+			AesCipher(cipherTxt, subCom.FreeArguments()...)
+		}
+	}
+}
+```

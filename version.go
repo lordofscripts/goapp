@@ -18,7 +18,7 @@ import "github.com/lordofscripts/goapp/app"
 const (
 	_NAME    string = "goApp"
 	_DESC    string = "a minimal GO CLI mini-framework"
-	_VERSION string = "1.4.0"
+	_VERSION string = "1.4.1"
 )
 
 var (
