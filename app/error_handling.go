@@ -21,18 +21,52 @@ import (
  *                       G L O B A L S
  *-----------------------------------------------------------------*/
 
+// Beware that non-monospace fonts will render a small gap between
+// the box characters in between lines!
+const (
+	CHR_HORIZ       rune = rune(0x2500)
+	CHR_VERT        rune = rune(0x2502)
+	CHR_INTERSEX    rune = rune(0x253C)
+	CHR_INTERSEX_L  rune = rune(0x251C)
+	CHR_INTERSEX_R  rune = rune(0x2524)
+	CHR_UPPER_LEFT       = rune(0x250C)
+	CHR_UPPER_RIGHT      = rune(0x2510)
+	CHR_LOWER_LEFT       = rune(0x2514)
+	CHR_LOWER_RIGHT      = rune(0x2518)
+)
+
 // False by default, but when true, every Die*() call also logs
 // the message via the `app.mlog` package.
 var LogOnDeath bool = false
+
+// preferred renderer for Messages
+var messageRender messageRenderer = errorMsgHeadingBoxed
+
+// preferred renderer for Errors
+var errorRender errorRenderer = errorHeadingBoxed
+
+type messageRenderer func(message string, exitCode int, isTerminal bool)
+type errorRenderer func(err error, exitCode int, isTerminal bool)
 
 /* ----------------------------------------------------------------
  *                       F U N C T I O N S
  *-----------------------------------------------------------------*/
 
+// by default they render as a box, else a simpler non-boxed version
+func ErrorMessageRenderAsBox(asBox bool) {
+	if asBox {
+		errorRender = errorHeadingBoxed
+		messageRender = errorMsgHeadingBoxed
+	} else {
+		errorRender = errorHeading
+		messageRender = errorMsgHeading
+	}
+}
+
 // Death of an application by outputting a good-bye and setting
 // the OS exit code. It is logged as fatal.
 func Die(message string, exitCode int) {
-	errorMsgHeading(message, exitCode, true)
+	messageRender(message, exitCode, true)
 	if LogOnDeath {
 		mlog.FatalT(exitCode, message, mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
 	} else {
@@ -41,13 +75,13 @@ func Die(message string, exitCode int) {
 }
 
 func DieWith(exitCode int, format string, args ...any) {
-	errorMsgHeading(fmt.Sprintf(format, args...), exitCode, true)
+	messageRender(fmt.Sprintf(format, args...), exitCode, true)
 	os.Exit(exitCode)
 }
 
 // display the error and die with an exit code, logging it as Fatal.
 func DieWithError(err error, exitCode int) {
-	errorHeading(err, exitCode, true)
+	errorRender(err, exitCode, true)
 	if LogOnDeath {
 		mlog.FatalT(exitCode, err.Error(), mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
 	} else {
@@ -67,19 +101,19 @@ func Assert(condition bool, warnMessage string) {
 func AssertOrDie(condition bool, deathMessage string, exitCode int) {
 	if condition {
 		fmt.Fprintf(os.Stderr, "\n\t%c Assert Failed:", UC_RED_EXCLAMATION)
-		errorMsgHeading(deathMessage, exitCode, true)
+		messageRender(deathMessage, exitCode, true)
 		os.Exit(exitCode)
 	}
 }
 
 // prints the error message with the exit code but does NOT exit.
 func AnnounceErrorMessage(message string, exitCode int) {
-	errorMsgHeading(message, exitCode, false)
+	messageRender(message, exitCode, false)
 }
 
 // prints the error and exit code but does NOT exit the application.
 func AnnounceError(err error, exitCode int) {
-	errorHeading(err, exitCode, false)
+	errorRender(err, exitCode, false)
 }
 
 /* ----------------------------------------------------------------
@@ -126,6 +160,34 @@ func errorMsgHeading(message string, exitCode int, isTerminal bool) {
 	fmt.Fprintln(os.Stderr, strings.Repeat("-", 60))
 }
 
+func errorHeadingBoxed(err error, exitCode int, isTerminal bool) {
+	topLINE(75)
+	headingLINE(75, fmt.Sprintf("💥 ERROR (ERR-%03d) 💥", exitCode))
+	midLINE(75)
+	contentLINE(74, fmt.Sprintf("🎯 From: %s", callerPackage()))
+	for errC := err; errC != nil; errC = errors.Unwrap(errC) {
+		contentLINE(75, BulletWrap(75, errC.Error(), ""))
+	}
+	if isTerminal {
+		//headingLINE(75, "  💀 💀 💀  ") //🚫
+		contentLINE(75, Center("X x X", 75))
+	}
+	bottomLINE(75)
+}
+
+func errorMsgHeadingBoxed(message string, exitCode int, isTerminal bool) {
+	topLINE(75)
+	headingLINE(75, fmt.Sprintf("💥 ERROR (ERR-%03d) 💥", exitCode))
+	midLINE(75)
+	contentLINE(74, fmt.Sprintf("🎯 From: %s", callerPackage()))
+	contentLINE(75, BulletWrap(75, message, ""))
+	if isTerminal {
+		//headingLINE(75, "  💀 💀 💀  ") //🚫
+		contentLINE(75, Center("X x X", 75))
+	}
+	bottomLINE(75)
+}
+
 // Returns a string with the caller's package and line number.
 func callerPackage() string {
 	// PC, File, Line, OK
@@ -150,4 +212,110 @@ func callerPackage() string {
 		}
 	}
 	return ""
+}
+
+func Center(s string, width int) string {
+	if len(s) >= width {
+		return s
+	}
+	pad := width - len(s)
+	left := pad / 2
+	right := pad - left
+	return strings.Repeat(" ", left) + s + strings.Repeat(" ", right)
+}
+
+func BulletWrap(width int, s string, bullet string) string {
+	if width <= 0 {
+		return s
+	}
+	if bullet == "" {
+		bullet = "•"
+	}
+
+	lines := strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n")
+	if len(lines) == 0 {
+		return ""
+	}
+
+	indent := strings.Repeat(" ", len([]rune(bullet))+1) // bullet + one space
+	rendered := make([]string, 0, len(lines))
+
+	// first line: bullet + first line text
+	first := strings.TrimRight(lines[0], " \t")
+	firstRunes := []rune(first)
+
+	availFirst := width - (len([]rune(bullet)) + 1)
+	if availFirst < 1 {
+		availFirst = 1
+	}
+
+	if len(firstRunes) <= availFirst {
+		rendered = append(rendered, bullet+" "+first)
+	} else {
+		rendered = append(rendered, bullet+" "+string(firstRunes[:availFirst]))
+		rest := firstRunes[availFirst:]
+		// continue wrapping rest with indent, but only for this first line
+		rendered = append(rendered, wrapWithIndent(indent, rest, width)...)
+	}
+
+	// remaining lines: if longer than width, indent past the bullet
+	for i := 1; i < len(lines); i++ {
+		txt := strings.TrimRight(lines[i], " \t")
+		r := []rune(txt)
+		if len(r) == 0 {
+			rendered = append(rendered, "")
+			continue
+		}
+		if len(r) <= width {
+			rendered = append(rendered, string(r))
+		} else {
+			rendered = append(rendered, wrapWithIndent(indent, r, width)...)
+		}
+	}
+
+	return strings.Join(rendered, "\n")
+}
+
+func wrapWithIndent(indent string, runes []rune, width int) []string {
+	// wrap "already-specified" text: fill width- len(indent) on subsequent lines
+	avail := width - len([]rune(indent))
+	if avail < 1 {
+		avail = 1
+	}
+
+	out := []string{}
+	for len(runes) > 0 {
+		n := avail
+		if len(runes) < n {
+			n = len(runes)
+		}
+		out = append(out, indent+string(runes[:n]))
+		runes = runes[n:]
+	}
+	return out
+}
+
+// error/message box top line
+func topLINE(width int) {
+	fmt.Fprintf(os.Stderr, "    %c%s%c\n", CHR_UPPER_LEFT, strings.Repeat(string(CHR_HORIZ), width), CHR_UPPER_RIGHT)
+}
+
+// error/message box mid line between box heading and box content
+func midLINE(width int) {
+	fmt.Fprintf(os.Stderr, "    %c%s%c\n", CHR_INTERSEX_L, strings.Repeat(string(CHR_HORIZ), width), CHR_INTERSEX_R)
+}
+
+// error/message box bottom line
+func bottomLINE(width int) {
+	fmt.Fprintf(os.Stderr, "    %c%s%c\n", CHR_LOWER_LEFT, strings.Repeat(string(CHR_HORIZ), width), CHR_LOWER_RIGHT)
+}
+
+// error/message box heading line
+func headingLINE(width int, content string) {
+	fmt.Fprintf(os.Stderr, "    %c%s    %c\n", CHR_VERT, Center(content, width), CHR_VERT)
+}
+
+// error/message box content line
+func contentLINE(width int, content string) {
+	fmt.Fprintf(os.Stderr, "    %c%-*s%c\n", CHR_VERT, width, content, CHR_VERT)
 }

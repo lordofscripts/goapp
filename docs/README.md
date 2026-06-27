@@ -124,18 +124,34 @@ Then, should your application need to rest in peace:
   app.DieWithError(err, EXIT_CODE)
 ```  
 
-A sample output of a wrapped *terminal* (application dies) would look like:
+A sample output of a wrapped *terminal* (application dies) would look like
+this if you call `app.ErrorMessageRenderAsBox(false)` during the application
+initialization phase:
 
 ```
 💥 ERROR (ERR-001) 💥
 🎯 From: main #73
 ·  Wrapped: just kidding! demonstrating error formatting
 ·  just kidding! demonstrating error formatting
-💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 💀 
+                         X x X
 ------------------------------------------------------------
 ```
 
-if it is an error without application termination, the skulls will be missing.
+but by default the `app.Die*()` would render the message or error as
+an ASCII box (renders fine unless the terminal uses a non-monospace font!):
+
+```
+    ┌───────────────────────────────────────────────────────────────────────────┐
+    │                         💥 ERROR (ERR-001) 💥                             │
+    ├───────────────────────────────────────────────────────────────────────────┤
+    │🎯 From: main #73                                                          │
+    │• Wrapped: just kidding! demonstrating error formatting                    │
+    │• just kidding! demonstrating error formatting                             │
+    │                                   X x X                                   │
+    └───────────────────────────────────────────────────────────────────────────┘
+```
+
+if it is an error without application termination, the `X x X` will be missing.
 
 And there are a few more utility functions. Please check the package
 documentation.
@@ -193,6 +209,8 @@ func DemoMain() {
 		SUBCMD_ENCODE string = "encrypt"
 		SUBCMD_DECODE string = "decrypt"
 	)
+
+	//ErrorMessageRenderAsBox(false) // By default render as a Box
 	subCom := NewFlagSubCommander()
 
 	HelpEncrypt := func() {
@@ -210,7 +228,7 @@ func DemoMain() {
 	cipherTxt := decodeCmd.String("cipher", "", "Ciphered text to decrypt")
 
 	if err := subCom.Parse(); err != nil {
-		fmt.Println(err.Error())
+		app.DieWithError(err, 25)
 	} else {
 		// do something
 		switch subCom.SubCommandName() {
