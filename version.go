@@ -18,11 +18,11 @@ import "github.com/lordofscripts/goapp/app"
 const (
 	_NAME    string = "goApp"
 	_DESC    string = "a minimal GO CLI mini-framework"
-	_VERSION string = "1.4.2"
+	_VERSION string = "1.4.3"
 )
 
 var (
-	ModuleVersion app.PackageVersion = app.NewReleaseVersion(_NAME, _DESC, _VERSION)
+	ModuleVersion app.PackageVersion = app.NewReleaseCandidateVersion(_NAME, _DESC, _VERSION, 1)
 )
 
 /* ----------------------------------------------------------------
