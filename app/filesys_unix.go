@@ -9,7 +9,10 @@
  *-----------------------------------------------------------------*/
 package app
 
-import "syscall"
+import (
+	"path"
+	"syscall"
+)
 
 /* ----------------------------------------------------------------
  *					F u n c t i o n s
@@ -30,5 +33,5 @@ func Dup2(oldfd, newfd any) error {
 // (Linux|Unix|Darwin) whether the file is hidden, i.e. its
 // name starts with a leading period.
 func IsHiddenFile(filename string) (bool, error) {
-	return filename[0] == '.', nil
+	return path.Base(filename)[0] == '.', nil
 }
