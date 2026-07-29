@@ -75,8 +75,10 @@ You have two choices of enhanced logging ready to use:
 * [Colored MLog](./MLOG.md#colored-logging) is a variant of MLog that
   always logs to a colored console, it supports log levels by prefixing
   them but the output happens *regardless* of the actual log level.
+  Don't forget to call `app.PreferMLog()` during initialization.
 * [Logx](LOGX.md) preformatted logging with call-tree support, it was
-  instrumental to get one of my Fyne GUI applications to work.
+  instrumental to get one of my Fyne GUI applications to work. Don't
+  forget to call `app.PreferLogX()` during initialization.
 
 For examples see the supplied [demo application](../cmd/main.go).
 

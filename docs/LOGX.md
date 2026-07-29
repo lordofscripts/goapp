@@ -133,6 +133,7 @@ set LogX this way:
     logx.SingLogGate = logx.GetLogGateInstance(APPNAME, APPGROUP_SUBDIR)
     logx.SingLogGate.WithConfigSubdirectory(APPGROUP).SetAppName(APPNAME).LoadFilters()
     logx.SingLogGate.WithCallTree(CALL_TREE_FILE)
+    app.PreferLogX() // Tell app.Die*() functions to use logx engine
 ```
 
 Then on a Bash shell (or your favorite GUI Log viewer) you could follow it with:
@@ -163,3 +164,29 @@ These supplementary API calls are special because:
 * They are not conditional, they log regardless of the filters.
 * They automatically calculate the current nesting level and the calling function/method's
   package, struct and function/method name. It is done for you.
+
+### Usage
+
+```go
+import (
+  "github.com/lordofscripts/goapp/app"
+  "github.com/lordofscripts/goapp/app/logx"
+)
+
+var SingLogGate *logx.LogGate
+
+func init() {
+  SingLogGate = GetLogGateInstance().
+    SetAppName("MyApp").
+    WithCallTree("/tmp/myapp_calltree.log")
+  // to log to a file in the /home/janet/logs directory
+  SingLogGate.Setup("/home/janet/logs")
+  // to log to the terminal (default)
+  SingLogGate.Setup("term")
+  // to disable logging
+  SingLogGate.Setup("none")
+  // or alternatively...
+  SingLogGate.DisableLogging()
+  app.PreferLogX() // Tell app.Die*() functions to use logx engine
+}
+```

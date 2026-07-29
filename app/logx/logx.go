@@ -178,11 +178,12 @@ func (l *LogGate) WithConfigSubdirectory(subdir string) *LogGate {
 	return l
 }
 
-func (l *LogGate) WithCallTree(filename string) {
+func (l *LogGate) WithCallTree(filename string) *LogGate {
 	var err error
 	if l.fdCallTree, err = os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644); err == nil {
 		l.fdCallTree.WriteString(">>>>> " + l.AppName + " LogX Call Tree <<<<<<\n")
 	}
+	return l
 }
 
 // EnableLogging enables logging for tests

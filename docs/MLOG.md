@@ -139,3 +139,22 @@ earlier in this document. Keep in mind that this will output
 the various levels by prefixing the log entry with the level's
 shortform: TRC, DBG, INF, WRN, ERR, DIE, CAT. The output will
 be printed *regardless* of the actual logging level.
+
+### Usage
+
+```go
+import (
+  "github.com/lordofscripts/goapp/app"
+  "github.com/lordofscripts/goapp/app/logx"
+)
+
+var SingLogGate *logx.LogGate
+
+func main() {
+  defer mlog.CloseLogFiles()
+  // to disable logging
+  mlog.SetOutput(io.Discard) // by default it does os.Stderr
+  mlog.SetLevel(mlog.LevelInfo)
+  app.PreferMLog() // Tell app.Die*() functions to use mlog engine
+}
+```

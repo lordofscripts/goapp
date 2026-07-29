@@ -271,7 +271,8 @@ func WarnT(message string, v ...ILogKeyValuePair) {
 		sb.WriteString(tagWARN)
 		sb.WriteString(message)
 		for _, t := range v {
-			sb.WriteString(" " + t.String())
+			sb.WriteString(" ")
+			sb.WriteString(t.String())
 		}
 		ilogger.Print(sb.String())
 	}
@@ -299,7 +300,8 @@ func ErrorT(message string, v ...ILogKeyValuePair) {
 		sb.WriteString(tagERROR)
 		sb.WriteString(message)
 		for _, t := range v {
-			sb.WriteString(" " + t.String())
+			sb.WriteString(" ")
+			sb.WriteString(t.String())
 		}
 		ilogger.Print(sb.String())
 	}
@@ -341,7 +343,8 @@ func FatalT(exitCode int, message string, v ...ILogKeyValuePair) {
 		sb.WriteString(tagFATAL)
 		sb.WriteString(message)
 		for _, t := range v {
-			sb.WriteString(" " + t.String())
+			sb.WriteString(" ")
+			sb.WriteString(t.String())
 		}
 		ilogger.Print(sb.String())
 	}
