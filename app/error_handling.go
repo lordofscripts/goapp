@@ -10,6 +10,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"runtime"
 	"strings"
@@ -35,9 +36,16 @@ const (
 	CHR_LOWER_RIGHT      = rune(0x2518)
 )
 
+const (
+	_LOG_WITH_DEFAULT preferredLogService = iota
+	_LOG_WITH_MLOG
+	_LOG_WITH_LOGX
+)
+
 // False by default, but when true, every Die*() call also logs
 // the message via the `app.mlog` package.
 var LogOnDeath bool = false
+var preferredLog preferredLogService = _LOG_WITH_DEFAULT
 
 // preferred renderer for Messages
 var messageRender messageRenderer = errorMsgHeadingBoxed
@@ -45,12 +53,33 @@ var messageRender messageRenderer = errorMsgHeadingBoxed
 // preferred renderer for Errors
 var errorRender errorRenderer = errorHeadingBoxed
 
+/* ----------------------------------------------------------------
+ *                         T Y P E S
+ *-----------------------------------------------------------------*/
+
+type preferredLogService = byte
+
 type messageRenderer func(message string, exitCode int, isTerminal bool)
 type errorRenderer func(err error, exitCode int, isTerminal bool)
 
 /* ----------------------------------------------------------------
  *                       F U N C T I O N S
  *-----------------------------------------------------------------*/
+
+// app functions that do report to log will use standard log package
+func PreferDefaultLog() {
+	preferredLog = _LOG_WITH_DEFAULT
+}
+
+// app functions that do report to log will use app/mlog package
+func PreferMLog() {
+	preferredLog = _LOG_WITH_MLOG
+}
+
+// app functions that do report to log will use app/logx package
+func PreferLogX() {
+	preferredLog = _LOG_WITH_LOGX
+}
 
 // by default they render as a box, else a simpler non-boxed version
 func ErrorMessageRenderAsBox(asBox bool) {
@@ -68,7 +97,16 @@ func ErrorMessageRenderAsBox(asBox bool) {
 func Die(message string, exitCode int) {
 	messageRender(message, exitCode, true)
 	if LogOnDeath {
-		mlog.FatalT(exitCode, message, mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+		altMsg := fmt.Sprintf("Died: YES ExitCode: %d Message: %s", exitCode, message)
+		switch preferredLog {
+		case _LOG_WITH_DEFAULT:
+			fallthrough
+		case _LOG_WITH_LOGX:
+			log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
+			os.Exit(exitCode)
+		case _LOG_WITH_MLOG:
+			mlog.FatalT(exitCode, message, mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+		}
 	} else {
 		os.Exit(exitCode)
 	}
@@ -83,7 +121,16 @@ func DieWith(exitCode int, format string, args ...any) {
 func DieWithError(err error, exitCode int) {
 	errorRender(err, exitCode, true)
 	if LogOnDeath {
-		mlog.FatalT(exitCode, err.Error(), mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+		altMsg := fmt.Sprintf("Died: YES ExitCode: %d Error: %v", exitCode, err)
+		switch preferredLog {
+		case _LOG_WITH_DEFAULT:
+			fallthrough
+		case _LOG_WITH_LOGX:
+			log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
+			os.Exit(exitCode)
+		case _LOG_WITH_MLOG:
+			mlog.FatalT(exitCode, err.Error(), mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+		}
 	} else {
 		os.Exit(exitCode)
 	}
@@ -244,10 +291,7 @@ func BulletWrap(width int, s string, bullet string) string {
 	first := strings.TrimRight(lines[0], " \t")
 	firstRunes := []rune(first)
 
-	availFirst := width - (len([]rune(bullet)) + 1)
-	if availFirst < 1 {
-		availFirst = 1
-	}
+	availFirst := max(width-(len([]rune(bullet))+1), 1)
 
 	if len(firstRunes) <= availFirst {
 		rendered = append(rendered, bullet+" "+first)
@@ -278,10 +322,7 @@ func BulletWrap(width int, s string, bullet string) string {
 
 func wrapWithIndent(indent string, runes []rune, width int) []string {
 	// wrap "already-specified" text: fill width- len(indent) on subsequent lines
-	avail := width - len([]rune(indent))
-	if avail < 1 {
-		avail = 1
-	}
+	avail := max(width-len([]rune(indent)), 1)
 
 	out := []string{}
 	for len(runes) > 0 {
