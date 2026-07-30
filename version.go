@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	ModuleVersion app.PackageVersion = app.NewReleaseCandidateVersion(_NAME, _DESC, _VERSION, 1)
+	ModuleVersion app.PackageVersion = app.NewReleaseVersion(_NAME, _DESC, _VERSION)
 )
 
 /* ----------------------------------------------------------------
