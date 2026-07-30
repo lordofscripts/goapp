@@ -65,6 +65,7 @@ Requirements:
 * A `app.Warning` object that implements `error` interface and user
   can customize the `app.WarningCode` as an enumeration. See example.
 * A helper to deal with sub-commands and FlagSets `flagx.FlagSubCommander`
+* A flexible `util.Filename` filename query and manipulation object.
 
 ### Logging
 
@@ -243,4 +244,29 @@ func DemoMain() {
 		}
 	}
 }
+```
+
+### Filename Manipulations
+
+A convenient object for filename object manipulations has been promoted to 
+this module. It supports single operations (immediate result), or a query
+mode in which multiple operations are chained. See the `util.NewFilename()`
+constructor and the `util.IFilenameQuery` interface.
+
+```go
+func FilenameOpsDemo() {
+	// Single operations mode
+	fnS := NewFilename("/usr/share/apache/config/apache_config.cfg")
+	fnS.RemoveExt() // /usr/share/apache/config/apache_config
+	fnS.ReplaceExt(".txt") // /usr/share/apache/config/apache_config.txt
+	ok, err := fnS.IsDirectory() // false
+	fnS.IsInPath("/tmp") // false
+
+	// Query mode
+	fnQ := NewFilename("/tmp/apache_config.cfg").
+		With().
+		ChangeExt("txt").	// /tmp/apache_config.txt
+		ChangeDirectory("/usr/share") // /usr/share/apache_config.txt
+	result := fnQ.QueryStrResult(true)
+} 
 ```
