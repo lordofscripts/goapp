@@ -123,6 +123,15 @@ was being invoked and when -as a result of that- modified values were being
 propagated to other widgets. And, I wanted to see the call-tree depth (nesting level)
 as well.
 
+By default the *Call Tree* is outputed to the same file descriptor (file,
+stderr, stdout) used by the underlying standard `log`. Therefore, its output
+is intermingled with the normal log giving context information. If on the
+other hand the developer wishes **only** call tree information, it is advised
+to output it to a separate file (not the standard log output of the other calls).
+For that, call `WithCallTree(filename)` and you will have the call tree
+alone in that file, and the standard log output in whatever output
+you use for the standard log. Note: This change is available from `v1.4.4`.
+
 I added a few non-conditional LOGX functions for that purpose. First, in your
 application, after you got the LogX instance, you must call this method to tell
 LogX to which separate file (separate from your application log file if any) you
@@ -178,7 +187,7 @@ var SingLogGate *logx.LogGate
 func init() {
   SingLogGate = GetLogGateInstance().
     SetAppName("MyApp").
-    WithCallTree("/tmp/myapp_calltree.log")
+    WithCallTree("/tmp/myapp_calltree.log") // else to same output
   // to log to a file in the /home/janet/logs directory
   SingLogGate.Setup("/home/janet/logs")
   // to log to the terminal (default)

@@ -241,8 +241,16 @@ func (l *LogGate) Close() {
 	}
 }
 
+// Writes to the call tree (separate file or default output).
+// The data string is expected WITHOUT line feed ("\n") as
+// it will be appended here.
 func (l *LogGate) WriteCallTree(data string) {
-	l.fdCallTree.WriteString(data + "\n")
+	data = data + "\n"
+	if l.fdCallTree == nil { // @#GHB-005
+		log.Print(data)
+	} else {
+		l.fdCallTree.WriteString(data)
+	}
 }
 
 /**
