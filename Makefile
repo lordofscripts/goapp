@@ -41,7 +41,7 @@ endif
 
 # ---------------------------------------------------
 
-// Publish package info to GO Package Repository
+# Publish package info to GO Package Repository
 proxy:
 	GOPROXY=proxy.golang.org go list -m $(PKG_PUBLIC_NAME)@v$(PKG_FULL_VERSION)
 
