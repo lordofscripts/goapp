@@ -17,8 +17,8 @@ import "github.com/lordofscripts/goapp/app"
 
 const (
 	_NAME    string = "goApp"
-	_DESC    string = "a minimal GO CLI mini-framework"
-	_VERSION string = "1.4.3"
+	_DESC    string = "Library of useful GO gadgets"
+	_VERSION string = "1.4.4"
 )
 
 var (
@@ -28,3 +28,24 @@ var (
 /* ----------------------------------------------------------------
  *                       F U N C T I O N S
  *-----------------------------------------------------------------*/
+
+/* DO NOT REMOVE - Used by Makefile
+//>>>BEGIN Versioner
+package main
+
+import (
+    "os"
+    "fmt"
+    "strings"
+    "github.com/lordofscripts/goapp"
+)
+
+func main() {
+    if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "short") {
+        fmt.Println(goapp.ModuleVersion.Short())
+    } else {
+        fmt.Println(goapp.ModuleVersion)
+    }
+}
+//>>>END Versioner
+*/

@@ -270,3 +270,46 @@ func FilenameOpsDemo() {
 	result := fnQ.QueryStrResult(true)
 } 
 ```
+
+### Chronometer
+
+Sometimes it is useful to time lengthy operations during tests,
+in-house development, or simply to inform the user. As of `v1.4.4`
+I created the `timex` subpackage:
+
+- `timex.NewChronometerItem()` measures a duration of execution
+  of one or more commands, with auto-start or manual start.
+- `time.Chronometer` object keeps track of several chronometer items.
+  At the end you can enumerate them. Instantiate with `timex.NewChronometer()`.
+
+```go
+func demoTimer() {
+	tmrX := NewChronometerItem("Sample", true)
+	// Run a specific timer
+	tmrX.Start()
+	//LongRunningOperation()
+	tmrX.Stop()
+	fmt.Println("Duration", tmrX)
+}
+```  
+
+or for a multi-timer:
+
+```go
+	// instantiate
+	chrono := util.NewChronometer()
+	// Chronometer's error handler
+	chrono.OnError = func(title string, errx error, exitCode int) {
+		fmt.Printf("❌ ERROR-%03d on %s\n", exitCode, title)
+		if exitCode != EXIT_OK {
+			app.DieWithError(errx, exitCode)
+		}
+	}
+	// Run an operation with auto-manage. When it finishes
+	// it will automatically print the durations.
+	chrono.Run(chronoTitle, func() (errT error, exitCode int) {
+		exitCode, errT := LengthyOperation()
+		:
+		// other stuff to be timed together
+	}
+```
