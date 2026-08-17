@@ -129,7 +129,7 @@ func newCustomLogWriter(w io.Writer, timeStampFormat string) *customLogWriter {
 
 func (clw *customLogWriter) Write(p []byte) (n int, err error) {
 	timestamp := time.Now().Format(clw.format)
-	formattedMessage := fmt.Sprintf("%s %s", timestamp, p)
+	formattedMessage := fmt.Sprintf("%s %s", timestamp, string(p))
 	return clw.writer.Write([]byte(formattedMessage))
 }
 
