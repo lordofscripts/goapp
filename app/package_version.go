@@ -7,7 +7,9 @@
  *-----------------------------------------------------------------*/
 package app
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /* ----------------------------------------------------------------
  *                       G L O B A L S
@@ -34,10 +36,12 @@ type DevStatus = string
 
 // Package/Module/Application version descriptor
 type PackageVersion struct {
-	n  string    // name
-	v  string    // version tag
-	s  DevStatus // status
-	sv int       // Alpha/Beta/RC-### sequence
+	n      string    // name
+	v      string    // version tag
+	s      DevStatus // status
+	sv     int       // Alpha/Beta/RC-### sequence
+	dsc    string    // description
+	author string    // module's author (optional)
 }
 
 /* ----------------------------------------------------------------
@@ -54,50 +58,55 @@ type PackageVersion struct {
 
 func NewPackageVersion(name, description string, verStr string, status DevStatus) PackageVersion {
 	return PackageVersion{
-		n:  name,
-		v:  verStr,
-		s:  status,
-		sv: 1,
+		n:   name,
+		v:   verStr,
+		s:   status,
+		sv:  1,
+		dsc: description,
 	}
 }
 
 // ctor for Release versions of a package
 func NewReleaseVersion(name, description string, verStr string) PackageVersion {
 	return PackageVersion{
-		n:  name,
-		v:  verStr,
-		s:  DevStatusReleased,
-		sv: 1,
+		n:   name,
+		v:   verStr,
+		s:   DevStatusReleased,
+		sv:  1,
+		dsc: description,
 	}
 }
 
 // ctor for Alpha versions of a package
 func NewAlphaVersion(name, description string, verStr string, alphaNum int) PackageVersion {
 	return PackageVersion{
-		n:  name,
-		v:  verStr,
-		s:  DevStatusAlpha,
-		sv: alphaNum,
+		n:   name,
+		v:   verStr,
+		s:   DevStatusAlpha,
+		sv:  alphaNum,
+		dsc: description,
 	}
 }
 
 // ctor for Beta versions of a package
 func NewBetaVersion(name, description string, verStr string, betaNum int) PackageVersion {
 	return PackageVersion{
-		n:  name,
-		v:  verStr,
-		s:  DevStatusBeta,
-		sv: betaNum,
+		n:   name,
+		v:   verStr,
+		s:   DevStatusBeta,
+		sv:  betaNum,
+		dsc: description,
 	}
 }
 
 // ctor for Release Candidate versions of a package, i.e. 1.0.0-RC.1
 func NewReleaseCandidateVersion(name, description string, verStr string, rcNum int) PackageVersion {
 	return PackageVersion{
-		n:  name,
-		v:  verStr,
-		s:  DevStatusRC,
-		sv: rcNum,
+		n:   name,
+		v:   verStr,
+		s:   DevStatusRC,
+		sv:  rcNum,
+		dsc: description,
 	}
 }
 
@@ -116,9 +125,19 @@ func (pv *PackageVersion) WithRevision(rev int) PackageVersion {
 	return *pv
 }
 
+// (Optional) register the module's author for Support information
+func (pv *PackageVersion) WithAuthor(author string) PackageVersion {
+	pv.author = author
+	return *pv
+}
+
+func (pv PackageVersion) GetAuthor() string {
+	return pv.author
+}
+
 // Like String() but without the name, just the version number
-// prefixed with "v".
-func (pv PackageVersion) Short() string {
+// without the "v" prefix, i.e. "1.5.4".
+func (pv PackageVersion) Version() string {
 	var ver string
 
 	switch pv.s {
@@ -127,18 +146,30 @@ func (pv PackageVersion) Short() string {
 	case DevStatusBeta:
 		fallthrough
 	case DevStatusRC:
-		ver = fmt.Sprintf("v%s-%s.%d", pv.v, pv.s, pv.sv)
+		ver = fmt.Sprintf("%s-%s.%d", pv.v, pv.s, pv.sv)
 	default:
-		ver = fmt.Sprintf("v%s", pv.v)
+		ver = fmt.Sprintf("%s", pv.v)
 	}
 
 	return ver
+}
+
+// Like String() but without the name, just the version number
+// prefixed with "v". Or like Version() with "v" prefix.
+func (pv PackageVersion) Short() string {
+	return "v" + pv.Version()
 }
 
 // implements fmt.Stringer and returns the name of the package/module/app
 // followed by its version number.
 func (pv PackageVersion) String() string {
 	return fmt.Sprintf("%s %s", pv.n, pv.Short())
+}
+
+// Same as String() but with the description. Suitable for an application's
+// Support information
+func (pv PackageVersion) Info() string {
+	return fmt.Sprintf("%s : %s", pv.String(), pv.dsc)
 }
 
 // Example: Version.Copyright

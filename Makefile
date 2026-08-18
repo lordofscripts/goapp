@@ -13,7 +13,7 @@ endif
 GO_TAGS=-tags mlog
 
 # - Packagers only
-PKG_SEMANTIC_VERSION=$(shell sed -n '/>>>BEGIN/,/>>>END/p' version.go > /tmp/mainversion_sc.go && go run /tmp/mainversion_sc.go short)
+PKG_SEMANTIC_VERSION=$(shell sed -n '/>>>BEGIN/,/>>>END/p' version.go > /tmp/mainversion_gap.go && go run /tmp/mainversion_gap.go short)
 PKG_FULL_VERSION:= $(patsubst v%,%,$(PKG_SEMANTIC_VERSION))
 PKG_PUBLIC_NAME=$(shell grep -m 1 'module' go.mod | sed -E 's/^module\s+//p')
 PKG_NAME=goapp

@@ -18,16 +18,37 @@ import "github.com/lordofscripts/goapp/app"
 const (
 	_NAME    string = "goApp"
 	_DESC    string = "Library of useful GO gadgets"
-	_VERSION string = "1.4.4"
+	_VERSION string = "1.4.5"
 )
 
 var (
 	ModuleVersion app.PackageVersion = app.NewReleaseVersion(_NAME, _DESC, _VERSION)
 )
 
+var (
+	// All GO modules that import GoApp to use PackageVersion,
+	// can (optionally) use the Register method to have itself
+	// added here. The end-user application can enumerate this
+	// in the Help/Support information.
+	CustomImports []string = make([]string, 0)
+)
+
+/* ----------------------------------------------------------------
+ *                    I N I T I A L I A Z E R
+ *-----------------------------------------------------------------*/
+
+func init() {
+	RegisterModule(ModuleVersion)
+}
+
 /* ----------------------------------------------------------------
  *                       F U N C T I O N S
  *-----------------------------------------------------------------*/
+
+// Register so that it can be enumerated in Help info
+func RegisterModule(mod app.PackageVersion) {
+	CustomImports = append(CustomImports, mod.Info())
+}
 
 /* DO NOT REMOVE - Used by Makefile
 //>>>BEGIN Versioner

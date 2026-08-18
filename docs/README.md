@@ -96,6 +96,9 @@ For declaring your application/package versions:
  pver := app.NewBetaVersion(NAME, DESC, BASE_VERSION, REVISION)
  For Release Candidate version v1.3.2-RC.8
  pver := app.NewReleaseCandidateVersion(NAME, DESC, BASE_VERSION, REVISION)
+ :
+ pver.WithAuthor("Someone smart")
+ goapp.RegisterModule(pv)
 ```
 
 > For final release version v1.3.2
@@ -105,9 +108,23 @@ Getting the version number as displayed above:
 
 > pver.Short()
 
-The app name plus its version number:
+Without the "v" prefix `1.3.2`:
+
+> pver.Version()
+
+The app name plus its version number `demo v0.1.2`:
 
 > fmt.Println(pver.String())
+
+The app information `demo v0.1.2: Just an application`:
+
+> fmt.Println(pver.Info())
+
+If your module is using `app.PackageVersion` why not immediately
+register your module so that your application's support info/help
+can enumerate all imported modules that use GoApp?:
+
+> goapp.RegisterModule(pver)
 
 Outputting your application copyright on the CLI:
 

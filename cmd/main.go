@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lordofscripts/goapp"
 	"github.com/lordofscripts/goapp/app"
 	"github.com/lordofscripts/goapp/flagx"
 )
 
 const (
 	ORG_NAME       string      = "ACME"
-	APP_NAME       string      = "goapptest"
+	APP_NAME       string      = "goappTest"
 	META_FILE_MODE os.FileMode = 0644
 	MANUAL_VERSION             = "1.0.0"
 
@@ -26,10 +27,12 @@ const (
 )
 
 var (
-	Version app.PackageVersion = app.NewReleaseVersion(APP_NAME, "Just a test", MANUAL_VERSION)
+	Version app.PackageVersion = app.NewReleaseVersion(APP_NAME, "Just a goApp library demo", MANUAL_VERSION)
 )
 
 func main() {
+	goapp.RegisterModule(Version)
+
 	// ############ flagx Package ##############
 	var mySelect flagx.StringsFlag
 	var myByte flagx.ByteFlag
@@ -47,6 +50,10 @@ func main() {
 
 	// ########### app Package ##############
 	Version.Copyright("lordofscripts", CHR_TRIDENT)
+	fmt.Println("Guest Imports:")
+	for _, using := range goapp.CustomImports {
+		fmt.Println("\t" + using)
+	}
 
 	// ############ flagx Package ##############
 	fmt.Printf("Selected value: %s\n", mySelect.Value)
