@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/lordofscripts/goapp/app/mlog"
+	"github.com/lordofscripts/goapp/app/mtag"
 )
 
 /* ----------------------------------------------------------------
@@ -105,7 +106,7 @@ func Die(message string, exitCode int) {
 			log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
 			os.Exit(exitCode)
 		case _LOG_WITH_MLOG:
-			mlog.FatalT(exitCode, message, mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+			mlog.FatalT(exitCode, message, mtag.YesNo("Died", true), mtag.Int("Code", exitCode))
 		}
 	} else {
 		os.Exit(exitCode)
@@ -129,7 +130,7 @@ func DieWithError(err error, exitCode int) {
 			log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
 			os.Exit(exitCode)
 		case _LOG_WITH_MLOG:
-			mlog.FatalT(exitCode, err.Error(), mlog.YesNo("Died", true), mlog.Int("Code", exitCode))
+			mlog.FatalT(exitCode, err.Error(), mtag.YesNo("Died", true), mtag.Int("Code", exitCode))
 		}
 	} else {
 		os.Exit(exitCode)
