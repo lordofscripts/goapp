@@ -62,15 +62,18 @@ func (c *CallerInfo) ObjectInfo() string {
 	var sb strings.Builder
 
 	// clean package name
-	sb.WriteString(c.packageN + SEP)
+	sb.WriteString(c.packageN)
+	sb.WriteString(SEP)
 
 	// object if any (a method info)
 	if len(c.structure) > 0 {
-		sb.WriteString(c.structure + "{}.")
+		sb.WriteString(c.structure)
+		sb.WriteString("{}.")
 	}
 
 	// function or method
-	sb.WriteString(c.function + "()")
+	sb.WriteString(c.function)
+	sb.WriteString("()")
 	return sb.String()
 }
 
