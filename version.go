@@ -18,7 +18,7 @@ import "github.com/lordofscripts/goapp/app"
 const (
 	_NAME    string = "goApp"
 	_DESC    string = "Library of useful GO gadgets"
-	_VERSION string = "1.4.5"
+	_VERSION string = "1.4.6"
 )
 
 var (
@@ -50,7 +50,7 @@ func RegisterModule(mod app.PackageVersion) {
 	CustomImports = append(CustomImports, mod.Info())
 }
 
-/* DO NOT REMOVE - Used by Makefile
+/* DO NOT REMOVE - Used by Makefile - v2
 //>>>BEGIN Versioner
 package main
 
@@ -64,6 +64,8 @@ import (
 func main() {
     if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "short") {
         fmt.Println(goapp.ModuleVersion.Short())
+	} else if len(os.Args) == 2 && strings.EqualFold(os.Args[1], "version") {
+		fmt.Println(goapp.ModuleVersion.Version())
     } else {
         fmt.Println(goapp.ModuleVersion)
     }
