@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/lordofscripts/goapp/app/mtag"
 )
 
 /* ----------------------------------------------------------------
@@ -57,8 +59,8 @@ func (p *PackageInfo) String() string {
 // integer number is given, it refers to how many stack frames to retrieve
 // to get to the caller. The default (no parameter) is ONE frame back (caller).
 // @return (*PackageInfo) nil on error.
-func RetrievePackageInfo(frameNr ...FrameNr) *PackageInfo {
-	frames := FRAMENR_CALLER
+func RetrievePackageInfo(frameNr ...mtag.FrameNr) *PackageInfo {
+	frames := mtag.FRAMENR_CALLER
 	if len(frameNr) != 0 {
 		frames = frameNr[0]
 	}
