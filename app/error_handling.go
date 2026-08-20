@@ -14,9 +14,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-
-	"github.com/lordofscripts/goapp/app/mlog"
-	"github.com/lordofscripts/goapp/app/mtag"
 )
 
 /* ----------------------------------------------------------------
@@ -46,7 +43,6 @@ const (
 // False by default, but when true, every Die*() call also logs
 // the message via the `app.mlog` package.
 var LogOnDeath bool = false
-var preferredLog preferredLogService = _LOG_WITH_DEFAULT
 
 // preferred renderer for Messages
 var messageRender messageRenderer = errorMsgHeadingBoxed
@@ -67,21 +63,6 @@ type errorRenderer func(err error, exitCode int, isTerminal bool)
  *                       F U N C T I O N S
  *-----------------------------------------------------------------*/
 
-// app functions that do report to log will use standard log package
-func PreferDefaultLog() {
-	preferredLog = _LOG_WITH_DEFAULT
-}
-
-// app functions that do report to log will use app/mlog package
-func PreferMLog() {
-	preferredLog = _LOG_WITH_MLOG
-}
-
-// app functions that do report to log will use app/logx package
-func PreferLogX() {
-	preferredLog = _LOG_WITH_LOGX
-}
-
 // by default they render as a box, else a simpler non-boxed version
 func ErrorMessageRenderAsBox(asBox bool) {
 	if asBox {
@@ -99,15 +80,8 @@ func Die(message string, exitCode int) {
 	messageRender(message, exitCode, true)
 	if LogOnDeath {
 		altMsg := fmt.Sprintf("Died: YES ExitCode: %d Message: %s", exitCode, message)
-		switch preferredLog {
-		case _LOG_WITH_DEFAULT:
-			fallthrough
-		case _LOG_WITH_LOGX:
-			log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
-			os.Exit(exitCode)
-		case _LOG_WITH_MLOG:
-			mlog.FatalT(exitCode, message, mtag.YesNo("Died", true), mtag.Int("Code", exitCode))
-		}
+		log.Print(altMsg) // because log*.Fatal uses log.Fatal which uses exitCode=1
+		os.Exit(exitCode)
 	} else {
 		os.Exit(exitCode)
 	}
@@ -123,15 +97,8 @@ func DieWithError(err error, exitCode int) {
 	errorRender(err, exitCode, true)
 	if LogOnDeath {
 		altMsg := fmt.Sprintf("Died: YES ExitCode: %d Error: %v", exitCode, err)
-		switch preferredLog {
-		case _LOG_WITH_DEFAULT:
-			fallthrough
-		case _LOG_WITH_LOGX:
-			log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
-			os.Exit(exitCode)
-		case _LOG_WITH_MLOG:
-			mlog.FatalT(exitCode, err.Error(), mtag.YesNo("Died", true), mtag.Int("Code", exitCode))
-		}
+		log.Print(altMsg) // because logx.Fatal uses log.Fatal which uses exitCode=1
+		os.Exit(exitCode)
 	} else {
 		os.Exit(exitCode)
 	}
