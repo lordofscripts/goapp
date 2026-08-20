@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# Created: 20 Aug 2026
+# Updated: 20 Aug 2026
+# Developer: LordOfScripts™
+# Examples:
+#   - task mlog_demo BUILD_TYPE=debug
+#   - task mlog_demo
+version: '3'
+
+vars:
+  # ⚙️ Task 'MLog Demo' build paths
+  SRC_MLOG: cmd/examples/demo_mlog
+  BIN_MLOG: bin/demo_mlog
+  # ⚙️ Task 'GoApp Demo' build paths
+  SRC_APP: cmd/examples/demo_app
+  BIN_APP: bin/demo_app  
+  # ⚙️ Task 'Info' Software Distribution Information
+  PKG_NAME: goapp
+  PKG_PREFERRED_ARCH: amd64
+  PKG_REVISION: '1'
+  # 🚫 Off-limits
+  GREETING: 🔱 Greetings from LordOfScripts™ 🔱
+  # Build type: 'debug' (default is release)
+  BUILD_TYPE: '{{.BUILD_TYPE | default ""}}'  
+  PKG_SEMANTIC_VERSION:
+    sh: |
+      sed -n '/>>>BEGIN/,/>>>END/p' version.go > /tmp/mainversion_gap.go &&
+      go run /tmp/mainversion_gap.go short
+  PKG_FULL_VERSION:
+    sh: |
+      sed -n '/>>>BEGIN/,/>>>END/p' version.go > /tmp/mainversion_gap.go &&
+      go run /tmp/mainversion_gap.go version
+  PKG_PUBLIC_NAME: 
+    sh: go list -m
+  PKG_FULLNAME: '{{.PKG_NAME}}_{{.PKG_FULL_VERSION}}-{{.PKG_REVISION}}-{{.PKG_PREFERRED_ARCH}}'
+
+tasks:
+  default:
+    desc: Print a greeting message
+    cmds:
+      - echo -e "\t{{.GREETING}}\n\tAre you lost?\n\t☕️ https://buymeacoffee.com/lostinwriting"
+    silent: true
+
+  # Build MLog Demo (Task)
+  mlog_demo:
+    desc: Sample demonstration of MLog
+    cmds:
+      - echo "{{.GREETING}}"
+      - |
+        case "{{.BUILD_TYPE}}" in
+          debug)
+            go build -tags mlog,debug -v -o {{.BIN_MLOG}}_dev {{.SRC_MLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            ;;
+          *)
+            go build -tags mlog -v -o {{.BIN_MLOG}} {{.SRC_MLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            ;;
+        esac
+    silent: true
+
+  # Build GoApp Demo (Task)
+  goapp_demo:
+    desc: Sample demonstration of root GoApp capabilities
+    cmds:
+      - echo "{{.GREETING}}"
+      - |
+        case "{{.BUILD_TYPE}}" in
+          debug)
+            go build -tags mlog,debug -v -o {{.BIN_APP}}_dev {{.SRC_APP}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            ;;
+          *)
+            go build -tags mlog -v -o {{.BIN_APP}} {{.SRC_APP}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            ;;
+        esac
+    silent: true
+
+  # Run Tests (Task)
+  test:
+    desc: Regression and Unit Tests
+    cmds:
+      - go test -v tests/*_test.go
+
+  # Software Information (Task)
+  info:
+    desc: General information about this Software
+    cmds:
+      - 'echo -e "\tSemantic version: {{.PKG_SEMANTIC_VERSION}}"'
+      - 'echo -e "\tFull version: {{.PKG_FULL_VERSION}}"'
+      - 'echo -e "\tModule name: {{.PKG_PUBLIC_NAME}}"'
+      - 'echo -e "\tPackage name: {{.PKG_FULLNAME}}"'
+    silent: true      
