@@ -376,7 +376,7 @@ func getOffsetUTC() string {
 	if mins < 0 {
 		mins = -mins
 	}
-	return fmt.Sprintf("%c  Timezone  : %s %03d:%02d", UC_TIMER_RUNNING, zoneName, hours, mins)
+	return fmt.Sprintf("%c  Timezone  : %s UTC%+03d:%02d", UC_TIMER_RUNNING, zoneName, hours, mins)
 }
 
 // parse a string to convert it to a LogLevel value
