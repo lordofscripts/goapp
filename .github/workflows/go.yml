@@ -13,48 +13,48 @@ on:
 
 jobs:
 
-build:
-  runs-on: ubuntu-latest
-  strategy:
-    matrix:
-      tags: ['', 'mlog,-debug', 'mlog,debug']
-      include:
-        - tags: ''
-          description: 'Default (no mlog)'
-        - tags: 'mlog,-debug'
-          description: 'MLog Release Build'
-        - tags: 'mlog,debug'
-          description: 'MLog Development Build'
-  
-  steps:
-    - uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tags: ['', 'mlog,-debug', 'mlog,debug']
+        include:
+          - tags: ''
+            description: 'Default (no mlog)'
+          - tags: 'mlog,-debug'
+            description: 'MLog Release Build'
+          - tags: 'mlog,debug'
+            description: 'MLog Development Build'
+    
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.21'
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
 
-    - name: Install dependencies
-      run: go mod download
+      - name: Install dependencies
+        run: go mod download
 
-    - name: Build (${{ matrix.description }})
-      run: |
-        if [ -z "${{ matrix.tags }}" ]; then
-          go build -v ./...
-        else
-          go build -tags "${{ matrix.tags }}" -v ./...
-        fi
+      - name: Build (${{ matrix.description }})
+        run: |
+          if [ -z "${{ matrix.tags }}" ]; then
+            go build -v ./...
+          else
+            go build -tags "${{ matrix.tags }}" -v ./...
+          fi
 
-    - name: Test (${{ matrix.description }})
-      run: |
-        if [ -z "${{ matrix.tags }}" ]; then
-          GITHUBLOS=true go test -v -coverprofile=profile.cov ./...
-        else
-          GITHUBLOS=true go test -tags "${{ matrix.tags }}" -v -coverprofile=profile.cov ./...
-        fi
+      - name: Test (${{ matrix.description }})
+        run: |
+          if [ -z "${{ matrix.tags }}" ]; then
+            GITHUBLOS=true go test -v -coverprofile=profile.cov ./...
+          else
+            GITHUBLOS=true go test -tags "${{ matrix.tags }}" -v -coverprofile=profile.cov ./...
+          fi
 
-    - name: Send coverage
-      if: matrix.tags == ''  # Only send coverage once
-      uses: shogo82148/actions-goveralls@v1
-      with:
-        path-to-profile: profile.cov
+      - name: Send coverage
+        if: matrix.tags == ''  # Only send coverage once
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: profile.cov
