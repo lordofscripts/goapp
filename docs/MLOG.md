@@ -120,6 +120,23 @@ To log an error:
 
 > func Err(err error) ILogKeyValuePair
 
+Time only (added in v1.4.7):
+
+> func Time(key string, tm time.Time)
+> func TimeUTC(key string, tm time.Time)
+
+Date only (added in v1.4.7):
+
+> func Date(key string, tm time.Time)
+> func DateUTC(key string, tm time.Time)
+
+Float (added in v1.4.7) generic implementation:
+
+> func Float(key string, val float32, whole, decimals byte)
+> func Float(key string, val float64, whole, decimals byte)
+
+Money (added in v1.4.7) as well, similar to float.
+
 #### Colored Logging
 
 If you feel like logging messages to the text console with a flair

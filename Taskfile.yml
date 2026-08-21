@@ -11,6 +11,9 @@ vars:
   # ⚙️ Task 'MLog Demo' build paths
   SRC_MLOG: cmd/examples/demo_mlog
   BIN_MLOG: bin/demo_mlog
+  # ⚙️ Task 'ZLog Demo' build paths
+  SRC_ZLOG: cmd/examples/demo_zlog
+  BIN_ZLOG: bin/demo_zlog
   # ⚙️ Task 'GoApp Demo' build paths
   SRC_APP: cmd/examples/demo_app
   BIN_APP: bin/demo_app  
@@ -55,6 +58,24 @@ tasks:
             go build -tags mlog -v -o {{.BIN_MLOG}} {{.SRC_MLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
             ;;
         esac
+      - echo "delivered {{.BIN_MLOG}}"
+    silent: true
+
+  # Build ZLog Demo (Task)
+  zlog_demo:
+    desc: Sample demonstration of ZLog (Flexible logger)
+    cmds:
+      - echo "{{.GREETING}}"
+      - |
+        case "{{.BUILD_TYPE}}" in
+          debug)
+            go build -tags zlog,debug -v -o {{.BIN_ZLOG}}_dev {{.SRC_ZLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            ;;
+          *)
+            go build -tags zlog -v -o {{.BIN_ZLOG}} {{.SRC_ZLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            ;;
+        esac
+      - echo "delivered {{.BIN_ZLOG}}"
     silent: true
 
   # Build GoApp Demo (Task)
@@ -71,13 +92,26 @@ tasks:
             go build -tags mlog -v -o {{.BIN_APP}} {{.SRC_APP}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
             ;;
         esac
+      - echo "delivered {{.BIN_APP}}"
     silent: true
+
+  # Publish Package (Task)
+  publish:
+    desc: Publish package via GO PROXY
+    cmds:
+      - GOPROXY=proxy.golang.org go list -m {{.PKG_PUBLIC_NAME}}@v{{.PKG_FULL_VERSION}}
 
   # Run Tests (Task)
   test:
     desc: Regression and Unit Tests
     cmds:
       - go test -v tests/*_test.go
+  
+  # Clean binaries (Task)
+  clean:
+    desc: Remove all output binaries
+    cmds:
+      - rm -f bin/*
 
   # Software Information (Task)
   info:

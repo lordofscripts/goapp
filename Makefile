@@ -12,6 +12,8 @@ SRC_DEMO_APP=$(SOURCES)/demo_app
 BIN_DEMO_APP=$(BIN)/demo_goapp
 SRC_DEMO_MLOG=$(SOURCES)/demo_mlog
 BIN_DEMO_MLOG=$(BIN)/demo_mlog
+SRC_DEMO_ZLOG=$(SOURCES)/demo_zlog
+BIN_DEMO_ZLOG=$(BIN)/demo_zlog
 
 # ------------------------ 🚫 ---------------------------
 
@@ -53,6 +55,13 @@ ifeq ($(BFILTER),)
 	$(GO) build -tags mlog,$(MODE) -v -o $(BIN_DEMO_MLOG)$(SUFFIX) $(SRC_DEMO_MLOG)/*.go
 else
 	$(GO) build -tags mlog,$(MODE) -v -o $(BIN_DEMO_MLOG)$(SUFFIX) $(SRC_DEMO_MLOG)/*.go 2>&1 | $(GOPRETTY) -color -width 75 -version
+endif
+
+dzlog:
+ifeq ($(BFILTER),)
+	$(GO) build -tags zlog,$(MODE) -v -o $(BIN_DEMO_ZLOG)$(SUFFIX) $(SRC_DEMO_ZLOG)/*.go
+else
+	$(GO) build -tags zlog,$(MODE) -v -o $(BIN_DEMO_ZLOG)$(SUFFIX) $(SRC_DEMO_ZLOG)/*.go 2>&1 | $(GOPRETTY) -color -width 75 -version
 endif
 
 dummy:
