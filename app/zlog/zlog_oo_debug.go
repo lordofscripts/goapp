@@ -423,10 +423,15 @@ func (blg *FlexLogger) OnCascade(to string, val any) {
 
 // User Interface widget clicked event.
 // NOTE: Only operational with "-tag debug", else NO-OP.
-func (blg *FlexLogger) OnClick() {
+func (blg *FlexLogger) OnClick(widg ...mtag.ILogKeyValuePair) {
 	nl, nm := GetNestingLevel(3)
-	blg.ilogger.Printf("%c CLK (%d) %s", UC_CLICK, nl, nm)
-	blg.writeCallTree(fmt.Sprintf("%3d CLK %c %s%s", nl, UC_CLICK, strings.Repeat(" ", nl), nm))
+	if len(widg) > 0 {
+		blg.ilogger.Printf("%c CLK (%d) %s %s", UC_CLICK, nl, nm, widg[0].String())
+		blg.writeCallTree(fmt.Sprintf("%3d CLK %c %s%s", nl, UC_CLICK, strings.Repeat(" ", nl), nm))
+	} else {
+		blg.ilogger.Printf("%c CLK (%d) %s %s", UC_CLICK, nl, nm, widg[0].String())
+		blg.writeCallTree(fmt.Sprintf("%3d CLK %c %s%s", nl, UC_CLICK, strings.Repeat(" ", nl), nm))
+	}
 }
 
 // Writes to the call tree (separate file or default output).

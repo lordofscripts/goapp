@@ -272,7 +272,7 @@ func (blg *FlexLogger) OnCascade(string, any) {}
 
 // User Interface widget clicked event.
 // NOTE: Only operational with "-tag debug", else NO-OP.
-func (blg *FlexLogger) OnClick() {}
+func (blg *FlexLogger) OnClick(...mtag.ILogKeyValuePair) {}
 
 /* ----------------------------------------------------------------
  *                 P U B L I C    M E T H O D S

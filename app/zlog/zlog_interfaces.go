@@ -123,19 +123,19 @@ type ILogTaggable interface {
 type ILogEventDriven interface {
 	WithCallTree(filename string) error // The file is created OR truncated.
 
-	Ctor()                          // For use to log that an object constructor is executing
-	EventEnter()                    // For use at entering a function/method of an EVENT callback
-	EventLeave()                    // For use at the end of a function/method of an EVENT callback
-	Enter()                         // For use at entering a function/method
-	Leave()                         // For use at the end of a function/method
-	Visit()                         // Just logging a visit without Enter/Leave
-	Step(string)                    // A procedural step within a code block/function/method
-	Result(format string, v ...any) // a function/method result of some kind
-	OnValidating()                  // a validation callback
-	OnChanged(toValue ...any)       // a value changed callback
-	OnUpdate()                      // a value change as a result of another trigger (?)
-	OnCascade(string, any)          // ?
-	OnClick()                       // User Interface widget clicked event
+	Ctor()                            // For use to log that an object constructor is executing
+	EventEnter()                      // For use at entering a function/method of an EVENT callback
+	EventLeave()                      // For use at the end of a function/method of an EVENT callback
+	Enter()                           // For use at entering a function/method
+	Leave()                           // For use at the end of a function/method
+	Visit()                           // Just logging a visit without Enter/Leave
+	Step(string)                      // A procedural step within a code block/function/method
+	Result(format string, v ...any)   // a function/method result of some kind
+	OnValidating()                    // a validation callback
+	OnChanged(toValue ...any)         // a value changed callback
+	OnUpdate()                        // a value change as a result of another trigger (?)
+	OnCascade(string, any)            // ?
+	OnClick(...mtag.ILogKeyValuePair) // User Interface widget clicked event
 }
 
 // Interface for a log object that implements filtering
