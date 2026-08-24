@@ -17,13 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tags: ['', 'mlog,-debug', 'mlog,debug']
+        tags: ['', 'mlog,-develop', 'mlog,develop']
         include:
           - tags: ''
             description: 'Default (no mlog)'
-          - tags: 'mlog,-debug'
+          - tags: 'mlog,-develop'
             description: 'MLog Release Build'
-          - tags: 'mlog,debug'
+          - tags: 'mlog,develop'
             description: 'MLog Development Build'
     
     steps:

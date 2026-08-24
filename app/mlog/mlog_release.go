@@ -1,4 +1,4 @@
-//go:build mlog && !debug
+//go:build mlog && !develop
 
 /* -----------------------------------------------------------------
  *					L o r d  O f   S c r i p t s (tm)

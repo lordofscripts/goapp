@@ -1,4 +1,4 @@
-//go:build logx && !debug
+//go:build logx && !develop
 
 /* -----------------------------------------------------------------
  *					L o r d  O f   S c r i p t s (tm)

@@ -1,6 +1,6 @@
 /*
  * Build instructions:
- *	(a) For debug version: -tags mlog,debug
+ *	(a) For debug version: -tags mlog,develop
  *	(b) For release version: -tags mlog
  */
 package main

@@ -1,6 +1,6 @@
 # - ⚙️ Builder settings
 #   BFILTER :: gocolor|gofilter|""
-#	MODE :: release|debug		(Example: make MODE=debug target)
+#	MODE :: release|develop		(Example: make MODE=develop target)
 BFILTER=gocolor
 MODE ?= release
 
@@ -27,7 +27,7 @@ else ifeq ($(BFILTER),gofilter)
 endif
 
 SUFFIX=""
-ifeq ($(MODE),debug)
+ifeq ($(MODE),develop)
     SUFFIX="_dev"
 endif
 

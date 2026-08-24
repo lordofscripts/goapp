@@ -69,7 +69,7 @@ type ILogConfigurable interface {
 // - The lowest (most verbose) level is Trace.
 // - The highest (least verbose) are Error & Fatal.
 // - Warning, Error & Fatal levels are always operational.
-// - Trace, Debug & Info only operational with "-tags debug"
+// - Trace, Debug & Info only operational with "-tags develop"
 type ILogPrioritized interface {
 	SetLevel(newLevel LogLevel) LogLevel
 
@@ -96,22 +96,22 @@ type ILogPrioritized interface {
 // - The lowest (most verbose) level is Trace.
 // - The highest (least verbose) are Error & Fatal.
 // - Warning, Error & Fatal levels are always operational.
-// - Trace, Debug & Info only operational with "-tags debug"
+// - Trace, Debug & Info only operational with "-tags develop"
 type ILogTaggable interface {
 	TraceT(message string, v ...mtag.ILogKeyValuePair)
 	DebugT(message string, v ...mtag.ILogKeyValuePair)
 	InfoT(message string, v ...mtag.ILogKeyValuePair)
 
 	// Tagged Warning logs a warning and continues.
-	// NOTE: It is always operational regardless of "-tag debug"
+	// NOTE: It is always operational regardless of "-tag develop"
 	WarnT(message string, v ...mtag.ILogKeyValuePair)
 
 	// Tagged Error logs an error and continues.
-	// NOTE: It is always operational regardless of "-tag debug"
+	// NOTE: It is always operational regardless of "-tag develop"
 	ErrorT(message string, v ...mtag.ILogKeyValuePair)
 
 	// Tagged Fatal logs a Fatal error and exits the application.
-	// NOTE: It is always operational regardless of "-tag debug"
+	// NOTE: It is always operational regardless of "-tag develop"
 	FatalT(exitCode int, message string, v ...mtag.ILogKeyValuePair)
 }
 
@@ -119,7 +119,7 @@ type ILogTaggable interface {
 // event-driven applications such as Graphical User Interfaces. These
 // functions allow for an alternate log in which a call tree with
 // cause-effect can be easily seen.
-// NOTE: Only operational IF "-tags debug" is set.
+// NOTE: Only operational IF "-tags develop" is set.
 type ILogEventDriven interface {
 	WithCallTree(filename string) error // The file is created OR truncated.
 
@@ -140,7 +140,7 @@ type ILogEventDriven interface {
 
 // Interface for a log object that implements filtering
 // log output by Module/Package/Object name.
-// NOTE: Only operational IF "-tags debug" is set.
+// NOTE: Only operational IF "-tags develop" is set.
 type ILogFilterable interface {
 	// By default a null filter service does no filtering. Else use
 	// NewLogFilterService() to pass here, or set to nil to revert.
@@ -151,7 +151,7 @@ type ILogFilterable interface {
 // Interface for a log object that has a Catheter file. That file
 // is an alternate output file for data other than logging or
 // end-user output.
-// NOTE: Only operational IF "-tags debug" is set.
+// NOTE: Only operational IF "-tags develop" is set.
 type ILogCatheterable interface {
 	SetCatheterFile(filename string) bool
 	PrintCatheter(message string, v ...mtag.ILogKeyValuePair)

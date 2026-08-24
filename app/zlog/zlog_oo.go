@@ -80,11 +80,11 @@ var UTF8_BOM []byte = []byte{0xEF, 0xBB, 0xBF}
  *-----------------------------------------------------------------*/
 
 var _ ILogConfigurable = (*FlexLogger)(nil)
-var _ ILogEventDriven = (*FlexLogger)(nil) // NO-OP if !debug
+var _ ILogEventDriven = (*FlexLogger)(nil) // NO-OP if !develop
 var _ ILogPrioritized = (*FlexLogger)(nil)
 var _ ILogTaggable = (*FlexLogger)(nil)
 var _ ILogFilterable = (*FlexLogger)(nil)
-var _ ILogCatheterable = (*FlexLogger)(nil) // NO-OP if !debug
+var _ ILogCatheterable = (*FlexLogger)(nil) // NO-OP if !develop
 
 /* ----------------------------------------------------------------
  *                   P U B L I C    T Y P E S

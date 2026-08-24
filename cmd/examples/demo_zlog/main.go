@@ -2,7 +2,7 @@
 
 /*
  * Build instructions (With Makefile or TaskFile):
- *	(a) For debug version: -tags zlog,debug
+ *	(a) For debug version: -tags zlog,develop
  *	(b) For release version: -tags zlog
  * Usage:
  *	demo_zlog -help

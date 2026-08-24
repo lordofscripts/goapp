@@ -3,7 +3,7 @@
 # Updated: 20 Aug 2026
 # Developer: LordOfScripts™
 # Examples:
-#   - task mlog_demo BUILD_TYPE=debug
+#   - task mlog_demo BUILD_TYPE=develop
 #   - task mlog_demo
 version: '3'
 
@@ -52,7 +52,7 @@ tasks:
       - |
         case "{{.BUILD_TYPE}}" in
           debug)
-            go build -tags mlog,debug -v -o {{.BIN_MLOG}}_dev {{.SRC_MLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            go build -tags mlog,develop -v -o {{.BIN_MLOG}}_dev {{.SRC_MLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
             ;;
           *)
             go build -tags mlog -v -o {{.BIN_MLOG}} {{.SRC_MLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
@@ -69,7 +69,7 @@ tasks:
       - |
         case "{{.BUILD_TYPE}}" in
           debug)
-            go build -tags zlog,debug -v -o {{.BIN_ZLOG}}_dev {{.SRC_ZLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            go build -tags zlog,develop -v -o {{.BIN_ZLOG}}_dev {{.SRC_ZLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
             ;;
           *)
             go build -tags zlog -v -o {{.BIN_ZLOG}} {{.SRC_ZLOG}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
@@ -86,7 +86,7 @@ tasks:
       - |
         case "{{.BUILD_TYPE}}" in
           debug)
-            go build -tags mlog,debug -v -o {{.BIN_APP}}_dev {{.SRC_APP}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
+            go build -tags mlog,develop -v -o {{.BIN_APP}}_dev {{.SRC_APP}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
             ;;
           *)
             go build -tags mlog -v -o {{.BIN_APP}} {{.SRC_APP}}/*.go 2>&1 | $HOME/go/bin/gocolor -color -width 75 -version
