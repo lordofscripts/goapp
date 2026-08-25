@@ -18,7 +18,7 @@ import "github.com/lordofscripts/goapp/app"
 const (
 	_NAME    string = "goApp"
 	_DESC    string = "Library of useful GO packages"
-	_VERSION string = "1.5.0"
+	_VERSION string = "1.5.1"
 )
 
 var (
