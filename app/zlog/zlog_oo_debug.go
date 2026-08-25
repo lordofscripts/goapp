@@ -427,9 +427,9 @@ func (blg *FlexLogger) OnClick(widg ...mtag.ILogKeyValuePair) {
 	nl, nm := GetNestingLevel(3)
 	if len(widg) > 0 {
 		blg.ilogger.Printf("%c CLK (%d) %s %s", UC_CLICK, nl, nm, widg[0].String())
-		blg.writeCallTree(fmt.Sprintf("%3d CLK %c %s%s", nl, UC_CLICK, strings.Repeat(" ", nl), nm))
+		blg.writeCallTree(fmt.Sprintf("%3d CLK %c %s%s %s", nl, UC_CLICK, strings.Repeat(" ", nl), nm, widg[0].String()))
 	} else {
-		blg.ilogger.Printf("%c CLK (%d) %s %s", UC_CLICK, nl, nm, widg[0].String())
+		blg.ilogger.Printf("%c CLK (%d) %s", UC_CLICK, nl, nm)
 		blg.writeCallTree(fmt.Sprintf("%3d CLK %c %s%s", nl, UC_CLICK, strings.Repeat(" ", nl), nm))
 	}
 }

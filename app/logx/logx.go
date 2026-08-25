@@ -456,7 +456,7 @@ func GetNestingLevel(frCnt ...int) (int, string) {
 	return nestingLevel, pretty
 }
 
-func getNames(fq string) (string, string, string) {
+func getNames(fq string) (string, string, string) { //@audit update to ZLog's
 	dotCnt := strings.Count(fq, ".")
 	index := strings.LastIndex(fq, ".")
 	var namePkg, nameStruct, nameFunc string

@@ -8,9 +8,10 @@
 package mlog
 
 import (
-	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/lordofscripts/goapp/util"
 )
 
 /* ----------------------------------------------------------------
@@ -57,6 +58,80 @@ import (
  * Gets the current nesting level with main.main() as reference and
  * a string with the location (package/struct/function).
  */
+func GetNestingLevel(frCnt ...int) (int, string) {
+	// moved here from app/logx package
+	spec := "%p%O%F"
+	// Capture the call stack
+	popCnt := 2
+	if frCnt != nil {
+		popCnt = frCnt[0]
+	}
+	pc := make([]uintptr, 10)        // Adjust size as needed
+	n := runtime.Callers(popCnt, pc) // Skip the first two frames (getNestingLevel and the calling function)
+
+	// Count how many frames until we reach main
+	nestingLevel := 0
+	var frame runtime.Frame
+	var comps util.FrameComponents
+
+	for _, p := range pc[:n] {
+		frame, _ = runtime.CallersFrames([]uintptr{p}).Next()
+
+		if frame.Function == "main.main" {
+			break
+		}
+
+		if nestingLevel == 0 {
+			comps = getNames(frame) // was frame.Function
+		}
+
+		nestingLevel++
+	}
+
+	const SEP_FUNC = "⯈"
+	const SEP_METH_PTR = "🡪"
+	const SEP_PKG = "▪" // ⮩🡂🡆⤷⮆🢂⭄🠞⏵➠⯈◾
+	pretty := spec
+
+	// transform package
+	//	· %P	fully-qualified package name
+	//	· %p	package base-name (last part)
+	pretty = strings.Replace(pretty, "%P", comps.Package+SEP_PKG, 1)
+	pretty = strings.Replace(pretty, "%p", comps.Package+SEP_PKG, 1)
+
+	// transform struct/object (if any)
+	var s string = comps.Struct
+	if comps.Struct != "" {
+		if comps.IsPointerReceiver {
+			s = s + SEP_METH_PTR
+		} else {
+			s = s + SEP_FUNC
+		}
+	}
+	pretty = strings.Replace(pretty, "%O", s, 1)
+	pretty = strings.Replace(pretty, "%o", s, 1)
+
+	// transform function
+	var f string = comps.Function + "." + comps.Closure
+	f = strings.TrimSuffix(f, ".")
+	if strings.Contains(pretty, "%F") {
+		f = f + "()"
+	}
+	pretty = strings.Replace(pretty, "%F", f, 1)
+	pretty = strings.Replace(pretty, "%f", f, 1)
+
+	//return nestingLevel, fmt.Sprintf("%03d %s", nestingLevel, pretty)
+	return nestingLevel, pretty
+}
+
+func getNames(fq runtime.Frame) util.FrameComponents {
+	fcp := util.NewFrameComponentParser()
+	fc := fcp.Parse(fq)
+
+	return fc
+}
+
+/*
 func GetNestingLevel(frCnt ...int) (int, string) {
 	// moved here from app/logx package
 	spec := "%p%O%F"
@@ -169,3 +244,4 @@ func getNames(fq string) (string, string, string) {
 	//fmt.Printf("\tP:%s S:%s F:%s\n", namePkg, nameStruct, nameFunc)
 	return namePkg, nameStruct, nameFunc
 }
+*/

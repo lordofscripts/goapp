@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/lordofscripts/goapp/util"
 )
 
 /* ----------------------------------------------------------------
@@ -71,6 +73,73 @@ func GetNestingLevel(frCnt ...int) (int, string) {
 
 	// Count how many frames until we reach main
 	nestingLevel := 0
+	var frame runtime.Frame
+	var comps util.FrameComponents
+
+	for _, p := range pc[:n] {
+		frame, _ = runtime.CallersFrames([]uintptr{p}).Next()
+
+		if frame.Function == "main.main" {
+			break
+		}
+
+		if nestingLevel == 0 {
+			comps = getNames(frame) // was frame.Function
+		}
+
+		nestingLevel++
+	}
+
+	const SEP_FUNC = "⯈"
+	const SEP_METH_PTR = "🡪"
+	const SEP_PKG = "▪" // ⮩🡂🡆⤷⮆🢂⭄🠞⏵➠⯈◾
+	pretty := spec
+
+	// transform package
+	//	· %P	fully-qualified package name
+	//	· %p	package base-name (last part)
+	pretty = strings.Replace(pretty, "%P", comps.Package+SEP_PKG, 1)
+	pretty = strings.Replace(pretty, "%p", comps.Package+SEP_PKG, 1)
+
+	// transform struct/object (if any)
+	var s string = comps.Struct
+	if comps.Struct != "" {
+		if comps.IsPointerReceiver {
+			s = s + SEP_METH_PTR
+		} else {
+			s = s + SEP_FUNC
+		}
+	}
+	pretty = strings.Replace(pretty, "%O", s, 1)
+	pretty = strings.Replace(pretty, "%o", s, 1)
+
+	// transform function
+	var f string = comps.Function + "." + comps.Closure
+	f = strings.TrimSuffix(f, ".")
+	if strings.Contains(pretty, "%F") {
+		f = f + "()"
+	}
+	pretty = strings.Replace(pretty, "%F", f, 1)
+	pretty = strings.Replace(pretty, "%f", f, 1)
+
+	//return nestingLevel, fmt.Sprintf("%03d %s", nestingLevel, pretty)
+	return nestingLevel, pretty
+}
+
+/*
+func GetNestingLevelOld(frCnt ...int) (int, string) {
+	// moved here from app/logx package
+	spec := "%p%O%F"
+	// Capture the call stack
+	popCnt := 2
+	if frCnt != nil {
+		popCnt = frCnt[0]
+	}
+	pc := make([]uintptr, 10)        // Adjust size as needed
+	n := runtime.Callers(popCnt, pc) // Skip the first two frames (getNestingLevel and the calling function)
+
+	// Count how many frames until we reach main
+	nestingLevel := 0
 	var pk, s, f string
 	var frame runtime.Frame
 	for _, p := range pc[:n] {
@@ -80,7 +149,7 @@ func GetNestingLevel(frCnt ...int) (int, string) {
 		}
 
 		if nestingLevel == 0 {
-			pk, s, f = getNames(frame.Function)
+			pk, s, f = getNames(frame) // was frame.Function
 		}
 		nestingLevel++
 	}
@@ -131,8 +200,50 @@ func GetNestingLevel(frCnt ...int) (int, string) {
 	//return nestingLevel, fmt.Sprintf("%03d %s", nestingLevel, pretty)
 	return nestingLevel, pretty
 }
+*/
 
+func getNames(fq runtime.Frame) util.FrameComponents {
+	fcp := util.NewFrameComponentParser()
+	fc := fcp.Parse(fq)
+
+	return fc
+}
+
+/*
 func getNames(fq string) (string, string, string) {
+	closureRegex := regexp.MustCompile(`\.func\d+(?:\.\d+)*$`)
+	closureSubmatchRegex := regexp.MustCompile(`\.(func\d+(?:\.\d+)*)$`)
+
+	// ExtractClosure returns the closure suffix (with leading ".") if present or an
+	// empty string. A closure looks like func1 or func15.1 or func2.3.4 etc.
+	// Examples:
+	//	- main.MyFunction						no closure
+	//	- main.MyFunction.func1					single closure
+	//	- main.(*MyStruct).MyMethod.func15.1 	nested closure
+	//	- github.com/foot/bar.pkg.func2.3.4 	deeply nested closure
+	ExtractClosure := func(fname string, noLeader bool) string {
+		if !noLeader {
+			// includes leading dot, i.e. ".func15.1"
+			return closureRegex.FindString(fname)
+		} else {
+			// excludes leading dot, i.e. "func2.3.4"
+			matches := closureSubmatchRegex.FindStringSubmatch(fname)
+			if len(matches) > 1 {
+				return matches[1]
+			}
+			return ""
+		}
+	}
+
+	// remove the closure so that it does not confused the rest of
+	// getNames(). Later on we append the closure to the name of the
+	// method or primary function.
+	myClosure := ExtractClosure(fq, false)
+	if myClosure != "" {
+		println("FQN ", fq)
+		fq = strings.Replace(fq, myClosure, "", 1)
+	}
+
 	// moved here from app/logx package
 	dotCnt := strings.Count(fq, ".")
 	index := strings.LastIndex(fq, ".")
@@ -152,24 +263,35 @@ func getNames(fq string) (string, string, string) {
 		namePkg = otherPart[:index]
 	default:
 		// github.com/lordofscripts/caesardisk/cmd/gui-app/gui.(*CipherModeGadget).Define.func1
+		// main.buildSecretsMenu.func1.1
 		re := regexp.MustCompile(`^[-\w]+\.[A-Za-z]+/`)
 		cleaned := re.ReplaceAllString(fq, "")
 		parts := strings.Split(cleaned, ".")
-		namePkg = (parts[0])[strings.LastIndex(parts[0], "/"):]
-		nameStruct = parts[1]
-		if len(parts) == 3 {
-			nameFunc = parts[2]
-		} else if len(parts) == 4 {
-			nameFunc = parts[2] + "." + parts[3]
+		lastSlash := strings.LastIndex(parts[0], "/")
+		if lastSlash == -1 {
+			println("Whooop! whooop! ", parts[0])
+			namePkg = parts[0]
+			nameStruct = ""
+			nameFunc = strings.Join(parts[1:], ".")
 		} else {
-			println(fq)
-			panic("WTF")
+			namePkg = (parts[0])[strings.LastIndex(parts[0], "/"):]
+			nameStruct = parts[1]
+			if len(parts) == 3 {
+				nameFunc = parts[2]
+			} else if len(parts) == 4 {
+				nameFunc = parts[2] + "." + parts[3]
+			} else {
+				println(fq)
+				panic("WTF")
+			}
 		}
 	}
+	nameFunc = nameFunc + myClosure
 
-	//fmt.Printf("\tP:%s S:%s F:%s\n", namePkg, nameStruct, nameFunc)
+	fmt.Printf("\tA:%s\n\tP:%s S:%s F:%s\n", fq, namePkg, nameStruct, nameFunc)
 	return namePkg, nameStruct, nameFunc
 }
+*/
 
 /* ----------------------------------------------------------------
  *				P r i v a t e	F u n c t i o n s
